@@ -1,7 +1,6 @@
 // store.js
 import React, { createContext, useContext, useReducer } from "react";
 
-const axios = require("axios");
 const StoreContext = createContext();
 const initialState = {
   message: "",
@@ -26,6 +25,7 @@ const reducer = (state, action) => {
         onDesignWall: {}
       };
     case "loadJSON":
+      console.log("loading json");
       var idx = 0;
       for (var i = 0; i < Object.keys(action.data.pieceGroups).length; i++) {
         state.pieceGroups[idx] = action.data.pieceGroups[i];

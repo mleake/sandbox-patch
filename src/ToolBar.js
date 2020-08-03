@@ -7,7 +7,7 @@ import { GrUndo } from "react-icons/gr";
 import { MdDelete, MdAddToPhotos } from "react-icons/md";
 import { RiSliceLine } from "react-icons/ri";
 import Toolbar from "@material-ui/core/Toolbar";
-import IconButton from "@material-ui/core/IconButton";
+import IconButton from "@material-ui/core/Button";
 
 export default class ToolBar extends React.Component {
   constructor(props) {

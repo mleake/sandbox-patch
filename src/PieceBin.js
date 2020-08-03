@@ -3,7 +3,7 @@ import { GrDrawer } from "react-icons/gr";
 import IconButton from "@material-ui/core/IconButton";
 import { Container, Row, Col, Form } from "react-bootstrap";
 import { useStore } from "./store";
-import { Stage, Layer, Path, Shape, Group } from "react-konva";
+import { Stage, Layer, Path, Group } from "react-konva";
 
 export const PieceBin = () => {
   const { state, dispatch } = useStore();
@@ -14,7 +14,7 @@ export const PieceBin = () => {
     openPieceBin ? setPieceBin(false) : setPieceBin(true);
   }
 
-  if (Object.keys(state.pieceGroups).length > 0) {
+  if (openPieceBin) {
     console.log(state.pieceGroups);
     return (
       <div className="PieceBin">
