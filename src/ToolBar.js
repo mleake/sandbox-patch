@@ -3,13 +3,13 @@ import CropIcon from "@material-ui/icons/Crop";
 import PaletteIcon from "@material-ui/icons/Palette";
 import { GiResize, GiArrowCursor, GiSewingNeedle } from "react-icons/gi";
 import { GrUndo } from "react-icons/gr";
-import { AiOutlineRotateLeft } from "react-icons/ai";
+// import { AiOutlineRotateLeft } from "react-icons/ai";
 import { MdDelete, MdAddToPhotos } from "react-icons/md";
 import { RiSliceLine } from "react-icons/ri";
 import Toolbar from "@material-ui/core/Toolbar";
 import IconButton from "@material-ui/core/IconButton";
 
-export default class MainPage extends React.Component {
+export default class ToolBar extends React.Component {
   constructor(props) {
     super(props);
     this.state = { tool: "potato" };
@@ -24,13 +24,10 @@ export default class MainPage extends React.Component {
 
   render() {
     return (
-      <div className="App">
+      <div className="ToolBar">
         <Toolbar position="static">
           <IconButton value="selecttool" onClick={this.handleClick}>
             <GiArrowCursor />
-          </IconButton>
-          <IconButton value="rotatetool" onClick={this.handleClick}>
-            <AiOutlineRotateLeft />
           </IconButton>
           <IconButton value="slicetool" onClick={this.handleClick}>
             <RiSliceLine />
@@ -59,9 +56,6 @@ export default class MainPage extends React.Component {
             <MdDelete />
           </IconButton>
         </Toolbar>
-
-        <h1>Hello CodeSandbox</h1>
-        <h2>Start editing to see some magic happen!</h2>
       </div>
     );
   }
