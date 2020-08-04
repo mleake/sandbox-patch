@@ -65,7 +65,7 @@ export const Loader = props => {
 
   return (
     <Button onClick={() => addPieceGroupFromImage(props.data.pieceGroups)}>
-      hello
+      load data
     </Button>
   );
 };

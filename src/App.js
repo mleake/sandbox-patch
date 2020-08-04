@@ -1,12 +1,13 @@
 import React from "react";
-import "./styles.css";
-import ToolBar from "./ToolBar";
+import { SewToolBar } from "./SewToolBar";
 import { PieceBin } from "./PieceBin";
 import { Loader } from "./Loader";
 import { StoreProvider } from "./store";
+import { ImprovSpace } from "./ImprovSpace";
 import * as JSONdata from "./data.json";
-import { useStore } from "./store";
+
 import { boundaryToSVG, scaleBoundaryToCanvas } from "./helpers";
+import "./styles.css";
 
 export default class App extends React.Component {
   componentDidMount() {
@@ -18,7 +19,8 @@ export default class App extends React.Component {
       <div className="App">
         <StoreProvider>
           <Loader data={JSONdata} />
-          <ToolBar />
+          <SewToolBar />
+          <ImprovSpace />
           <PieceBin />
         </StoreProvider>
       </div>

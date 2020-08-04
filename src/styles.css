@@ -1,4 +1,26 @@
 .App {
   font-family: sans-serif;
-  text-align: center;
+}
+
+.scrolling-wrapper {
+  overflow-x: scroll;
+  overflow-y: hidden;
+  white-space: nowrap;
+  width: 1000px;
+  height: 200px;
+  text-align: left;
+}
+
+.card {
+  display: inline-block;
+}
+
+.icbutton {
+  color: red;
+}
+
+.improvStage {
+  border: 1px solid black;
+  width: 1000px;
+  height: 800px;
 }

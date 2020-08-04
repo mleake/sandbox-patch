@@ -9,7 +9,8 @@ const initialState = {
   onDesignWall: {},
   fabrics: {},
   uploadedFile: "",
-  pieceGroups: {}
+  pieceGroups: {},
+  tool: "selecttool"
 };
 
 const reducer = (state, action) => {
@@ -23,6 +24,17 @@ const reducer = (state, action) => {
         selectedPieceID: "",
         fabrics: {},
         onDesignWall: {}
+      };
+
+    case "selectTool":
+      return {
+        message: action.message,
+        pieces: state.pieces,
+        pieceGroups: state.pieceGroups,
+        selectedPieceID: state.selectedPieceID,
+        fabrics: state.fabrics,
+        onDesignWall: state.onDesignWall,
+        tool: action.tool
       };
     case "loadJSON":
       console.log("loading json");
@@ -38,7 +50,8 @@ const reducer = (state, action) => {
         pieceGroups: state.pieceGroups,
         selectedPieceID: state.selectedPieceID,
         fabrics: state.fabrics,
-        onDesignWall: state.onDesignWall
+        onDesignWall: state.onDesignWall,
+        tool: state.tool
       };
     case "addFile":
       console.log("adding file", action.newFile);
