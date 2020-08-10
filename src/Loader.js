@@ -3,7 +3,7 @@ import { useStore } from "./store";
 import Button from "@material-ui/core/Button";
 import { boundaryToSVG, scaleBoundaryToCanvas } from "./helpers";
 
-export const Loader = props => {
+export const Loader = (props) => {
   const { state, dispatch } = useStore();
 
   function addPieceGroupFromImage(pieceGroups) {
@@ -43,25 +43,6 @@ export const Loader = props => {
       newPieceGroups: newPieceGroups
     });
   }
-
-  // useEffect(() => {
-  //   // Update the document title using the browser API
-  //   console.log(props.data);
-  //   // dispatch({
-  //   //   type: "loadJSON",
-  //   //   message: "loadJSON",
-  //   //   data: props.data
-  //   // });
-  //   addPieceGroupFromImage(props.data.data.pieceGroups);
-  // }, []);
-
-  // function loadData() {
-  //   dispatch({
-  //     type: "loadJSON",
-  //     message: "loadJSON",
-  //     data: JSONdata
-  //   });
-  // }
 
   return (
     <Button onClick={() => addPieceGroupFromImage(props.data.pieceGroups)}>

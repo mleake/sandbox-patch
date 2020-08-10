@@ -132,19 +132,6 @@ const reducer = (state, action) => {
         fabrics: state.fabrics,
         onDesignWall: state.onDesignWall
       };
-    case "loadPiece":
-      var whichPiece = action.whichPiece;
-      state.pieces[whichPiece].onDesignWall = !state.pieces[whichPiece]
-        .onDesignWall;
-      console.log(state);
-      return {
-        message: action.message,
-        pieces: state.pieces,
-        pieceGroups: state.pieceGroups,
-        selectedPieceID: state.selectedPieceID,
-        fabrics: state.fabrics,
-        onDesignWall: state.onDesignWall
-      };
     case "loadPieceGroup":
       var keyName = action.whichPiece;
       var currentVis = state.pieceGroups[keyName].onDesignWall;
@@ -352,7 +339,7 @@ const reducer = (state, action) => {
       //     state.pieces[pieceKey].rotation = tempData.rotation;
       //   }
       // }
-      action.newAttrs.forEach(element => {
+      action.newAttrs.forEach((element) => {
         var pg = element.whichPieceGroup;
         var p = element.whichPiece;
         state.pieceGroups[pg].pieceData[p].x = element.x;

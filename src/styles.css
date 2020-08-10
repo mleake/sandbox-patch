@@ -21,6 +21,23 @@
 
 .improvStage {
   border: 1px solid black;
-  width: 1000px;
+  width: 100%;
+  height: 100%;
+  display: inline-block;
+}
+
+.layoutDiv {
+  border: 1px solid black;
+  width: 100px;
   height: 800px;
+  display: inline-block;
+}
+
+.col-sm-8 {
+  display: inline-block;
+  margin: 0;
+}
+.col-sm-4 {
+  display: inline-block;
+  margin: 0;
 }

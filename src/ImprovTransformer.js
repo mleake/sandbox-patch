@@ -29,65 +29,6 @@ export default class ImprovTransformer extends React.Component {
   shapeSnap(activeObject) {
     var edgedetection = 40; //pixels to snap
     console.log("in shape snap");
-    // const stage = this.transformer.getStage();
-    // var shapes = stage.find(".improvGroup");
-    // var selected = shapes.filter(shape => shape.isVisible());
-    // shapes = selected;
-    // console.log(activeObject)
-    // // console.log(activeObject.getType())
-    // // console.log(activeObject.getAbsoluteTransform().decompose())
-    // var activeObjBB = getBBfromClientRect(activeObject);
-    //
-    // for (var i = 0; i < shapes.length; i++) {
-    //   var targ = shapes[i];
-    //   console.log(targ, activeObject);
-    //   console.log(activeObjBB);
-    //
-    //   if (targ.id() == activeObject.id()) {
-    //     return;
-    //   }
-    //   var targBB = getBBfromClientRect(targ);
-    //   console.log(targBB)
-    //
-    //   //snap from right
-    //   if (Math.abs(activeObjBB.tr.x - targBB.tl.x) < edgedetection) {
-    //     console.log("case1")
-    //     activeObject.x(targBB.left - activeObject.getClientRect().width);
-    //     activeObjBB = getBBfromClientRect(activeObject);
-    //   }
-    //   // snap from left
-    //   if (Math.abs(activeObjBB.tl.x - targBB.tr.x) < edgedetection) {
-    //     console.log("case2")
-    //     activeObject.x(targBB.left + targ.getClientRect().width);
-    //     activeObjBB = getBBfromClientRect(activeObject);
-    //   }
-    //   // snap from top
-    //   if (Math.abs(activeObjBB.br.y - targBB.tr.y) < edgedetection) {
-    //     console.log("case3")
-    //     activeObject.y(targBB.top - activeObject.getClientRect().height);
-    //     activeObjBB = getBBfromClientRect(activeObject);
-    //   }
-    //   // snap from bottom
-    //   if (Math.abs(targBB.br.y - activeObjBB.tr.y) < edgedetection) {
-    //     console.log("case4")
-    //     activeObject.y(targBB.top + targ.getClientRect().height);
-    //     activeObjBB = getBBfromClientRect(activeObject);
-    //   }
-    //   this.transformer.getLayer().batchDraw();
-    //   const overlapping = Konva.Util.haveIntersection(
-    //     targ.getClientRect(),
-    //     activeObject.getClientRect()
-    //   );
-    //   console.log(targ.getClientRect(), activeObject.getClientRect())
-    //   if (overlapping) {
-    //     console.log("overlapping")
-    //     targ.alpha(0.1)
-    //     activeObject.alpha(0.1);
-    //   } else {
-    //     targ.alpha(0.9)
-    //     activeObject.alpha(0.9);
-    //   }
-    // }
   }
 
   checkNode() {

@@ -25,7 +25,7 @@ export const PieceBin = () => {
     console.log(state.pieceGroups);
     return (
       <div className="PieceBin">
-        <IconButton value="openpiecebin" onClick={e => handleClick(e)}>
+        <IconButton value="openpiecebin" onClick={(e) => handleClick(e)}>
           <GrDrawer />
         </IconButton>
         <div className="scrolling-wrapper">
@@ -35,6 +35,7 @@ export const PieceBin = () => {
                 {Object.keys(state.pieceGroups[keyName].pieceData).map(
                   (pieceName, j) => (
                     <path
+                      key={"svg-" + keyName + "-" + pieceName}
                       d={state.pieceGroups[keyName].pieceData[pieceName].svg}
                       fill={
                         state.pieceGroups[keyName].pieceData[pieceName].color
@@ -48,7 +49,7 @@ export const PieceBin = () => {
                 control={
                   <Checkbox
                     checked={state.pieceGroups[keyName].onDesignWall}
-                    onChange={e => loadPieceGroup(e, keyName)}
+                    onChange={(e) => loadPieceGroup(e, keyName)}
                     inputProps={{ "aria-label": "primary checkbox" }}
                   />
                 }
@@ -61,7 +62,7 @@ export const PieceBin = () => {
     );
   } else {
     return (
-      <IconButton value="openpiecebin" onClick={e => handleClick(e)}>
+      <IconButton value="openpiecebin" onClick={(e) => handleClick(e)}>
         <GrDrawer />
       </IconButton>
     );
