@@ -57,49 +57,51 @@ export const SewToolBar = () => {
   function handleClick(ev) {
     var tool = ev.currentTarget.value;
     setLocalTool(tool);
+
+    if (tool == "sewtool") {
+      handleSew();
+    } else if (tool == "duplicatetool") {
+      handleDuplicate();
+    }
     dispatch({
       type: "selectTool",
       message: "selectTool",
       tool: tool
     });
-    if (tool == "sewtool") {
-      sewSelectedPieces();
-    }
   }
 
-  function sewSelectedPieces() {
-    // finishEdit();
+  function handleDuplicate() {
+    var piecesToDuplicate = [];
+    state.selectedShapes.map((shapeId, i) => {
+      var whichPieceGroup = shapeId.split("-")[1];
+      var whichPiece = shapeId.split("-")[2];
+      piecesToDuplicate.push({
+        pieceGroup: whichPieceGroup,
+        piece: whichPiece
+      });
+      dispatch({
+        type: "duplicatePieces",
+        message: "duplicatePieces",
+        piecesToDuplicate: piecesToDuplicate
+      });
+    });
+  }
+
+  function handleSew() {
     var piecesToMove = [];
-    state.selectedShapes.forEach((shapeId) => {
-      // var name = element.id();
-      var whichPieceGroup = shapeId.split("-")[0];
-      var whichPiece = shapeId.split("-")[1];
-      // var transform = element.getAbsoluteTransform();
-      // var offsetX = element.offsetX();
-      // var offsetY = element.offsetY();
+    state.selectedShapes.map((shapeId, i) => {
+      var whichPieceGroup = shapeId.split("-")[1];
+      var whichPiece = shapeId.split("-")[2];
       piecesToMove.push({
         pieceGroup: whichPieceGroup,
         piece: whichPiece
-        // offsetX: offsetX,
-        // offsetY: offsetY
       });
-    });
-    // tr.current.transformer.detach();
-    // var json = stageEl.current.toJSON();
-    // var newData = {};
-    // var dataURL = stageEl.current.toDataURL();
-    // newData.transformType = "sew";
-    // newData.pieces = piecesToMove;
-    // newData.stage = json;
-    // newData.dataURL = dataURL;
-    // transforms[Object.keys(transforms).length] = newData;
-    // setTransforms(transforms);
-    // console.log(transforms);
-    // downloadURI(dataURL, transforms.length.toString()+'.png');
-    dispatch({
-      type: "addSeam",
-      message: "addSeam",
-      piecesToMove: piecesToMove
+      dispatch({
+        type: "addSeam",
+        message: "addSeam",
+        piecesToMove: piecesToMove
+      });
+      console.log(state);
     });
   }
 

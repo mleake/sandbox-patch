@@ -51,6 +51,29 @@ const reducer = (state, action) => {
         tool: state.tool,
         selectedShapes: action.selectedShapes
       };
+    case "duplicatePieces":
+      action.piecesToDuplicate.forEach((element, idx) => {
+        var newPieceGroupId = Object.keys(state.pieceGroups).length;
+
+        var newPieceGroup = Object.assign(
+          {},
+          state.pieceGroups[element.pieceGroup]
+        );
+        state.pieceGroups[newPieceGroupId] = newPieceGroup;
+        state.pieceGroups[newPieceGroupId].idx = newPieceGroupId;
+        state.onDesignWall[newPieceGroupId] = true;
+        state.pieceGroups[newPieceGroupId].onDesignWall = true;
+      });
+      return {
+        message: action.message,
+        pieces: state.pieces,
+        pieceGroups: state.pieceGroups,
+        selectedPieceID: state.selectedPieceID,
+        fabrics: state.fabrics,
+        onDesignWall: state.onDesignWall,
+        tool: state.tool,
+        selectedShapes: state.selectedShapes
+      };
     case "loadJSON":
       console.log("loading json");
       var idx = 0;
