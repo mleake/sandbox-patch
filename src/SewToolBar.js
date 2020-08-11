@@ -62,6 +62,45 @@ export const SewToolBar = () => {
       message: "selectTool",
       tool: tool
     });
+    if (tool == "sewtool") {
+      sewSelectedPieces();
+    }
+  }
+
+  function sewSelectedPieces() {
+    // finishEdit();
+    var piecesToMove = [];
+    state.selectedShapes.forEach((shapeId) => {
+      // var name = element.id();
+      var whichPieceGroup = shapeId.split("-")[0];
+      var whichPiece = shapeId.split("-")[1];
+      // var transform = element.getAbsoluteTransform();
+      // var offsetX = element.offsetX();
+      // var offsetY = element.offsetY();
+      piecesToMove.push({
+        pieceGroup: whichPieceGroup,
+        piece: whichPiece
+        // offsetX: offsetX,
+        // offsetY: offsetY
+      });
+    });
+    // tr.current.transformer.detach();
+    // var json = stageEl.current.toJSON();
+    // var newData = {};
+    // var dataURL = stageEl.current.toDataURL();
+    // newData.transformType = "sew";
+    // newData.pieces = piecesToMove;
+    // newData.stage = json;
+    // newData.dataURL = dataURL;
+    // transforms[Object.keys(transforms).length] = newData;
+    // setTransforms(transforms);
+    // console.log(transforms);
+    // downloadURI(dataURL, transforms.length.toString()+'.png');
+    dispatch({
+      type: "addSeam",
+      message: "addSeam",
+      piecesToMove: piecesToMove
+    });
   }
 
   return (

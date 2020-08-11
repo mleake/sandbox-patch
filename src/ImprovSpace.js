@@ -12,77 +12,6 @@ export const ImprovSpace = () => {
   const layerEl = React.createRef();
   const selectionRectRef = React.createRef();
   const tr = React.createRef();
-  const [selectionRect, setSelectionRect] = useState({});
-  const [startedSelection, setStartedSelection] = useState(false);
-  const [draggedSelection, setDraggedSelection] = useState(false);
-
-  function mouseDownSelect(event) {
-    //ignore clicks on shapes
-    if (event.target !== event.target.getStage()) {
-      return;
-    }
-    dispatch({
-      type: "selectShapes",
-      message: "selectShapes",
-      selectedShapes: []
-    });
-    const pos = stageEl.current.getPointerPosition();
-    setSelectionRect({ startX: pos.x, startY: pos.y, width: 0, height: 0 });
-    setStartedSelection(true);
-    setDraggedSelection(false);
-  }
-
-  function mouseMoveSelect(event) {
-    if (startedSelection) {
-      const sx = selectionRect.startX;
-      const sy = selectionRect.startY;
-      const pos = stageEl.current.getPointerPosition();
-      const annotationToAdd = {
-        startX: sx,
-        startY: sy,
-        width: pos.x - sx,
-        height: pos.y - sy
-      };
-      setSelectionRect(annotationToAdd);
-      setDraggedSelection(true);
-    }
-  }
-
-  function mouseUpSelect(event) {
-    if (startedSelection && draggedSelection) {
-      var sx = selectionRect.startX;
-      var sy = selectionRect.startY;
-      var pos = stageEl.current.getPointerPosition();
-      const annotationToAdd = {
-        startX: sx,
-        startY: sy,
-        width: pos.x - sx,
-        height: pos.y - sy
-      };
-      setSelectionRect(annotationToAdd);
-
-      var shapes = stageEl.current.find(".piece").toArray();
-      if (shapes.length > 0) {
-        var sr = stageEl.current.findOne("#sr");
-        var box = sr.getClientRect();
-        var selected = shapes.filter(
-          (shape) =>
-            shape.isVisible() &&
-            Konva.Util.haveIntersection(box, shape.getClientRect())
-        );
-        var selectedIds = [];
-        selected.forEach((shape) => selectedIds.push(shape.id()));
-        dispatch({
-          type: "selectShapes",
-          message: "selectShapes",
-          selectedShapes: selectedIds
-        });
-      }
-    }
-    setDraggedSelection(false);
-    setStartedSelection(false);
-    setSelectionRect({ startX: pos.x, startY: pos.y, width: 0, height: 0 });
-  }
 
   function handleStageMouseDown(e) {
     e.preventDefault;
@@ -104,28 +33,69 @@ export const ImprovSpace = () => {
     }
   }
 
+  function handleDoubleClick(event) {
+    console.log("dc");
+    if (event.target !== event.target.getStage()) {
+      console.log("ss", state.selectedShapes);
+      var idx = event.target.id();
+      var index = state.selectedShapes.indexOf(idx);
+      if (index < 0) {
+        var newSelectedShapes = [...state.selectedShapes, idx];
+        dispatch({
+          type: "selectShapes",
+          message: "selectShapes",
+          selectedShapes: newSelectedShapes
+        });
+      }
+    } else {
+      dispatch({
+        type: "selectShapes",
+        message: "selectShapes",
+        selectedShapes: []
+      });
+    }
+  }
+  function removeShape(idx) {
+    var array = [...state.selectedShapes]; // make a separate copy of the array
+    var index = array.indexOf(idx);
+    if (index !== -1) {
+      array.splice(index, 1);
+    }
+    return array;
+  }
+
+  function handleClick(event) {
+    if (event.target !== event.target.getStage()) {
+      var newSelectedShapes = removeShape(event.target.id());
+      dispatch({
+        type: "selectShapes",
+        message: "selectShapes",
+        selectedShapes: newSelectedShapes
+      });
+    } else {
+      dispatch({
+        type: "selectShapes",
+        message: "selectShapes",
+        selectedShapes: []
+      });
+    }
+  }
+
+  function handleDoubleTap() {
+    console.log("dt");
+  }
+
   return (
     <div className="improvStage">
       <Stage
         key="improvStage"
         width={1000}
         height={800}
-        onMouseDown={handleStageMouseDown}
-        onMouseMove={handleStageMouseMove}
-        onMouseUp={handleStageMouseUp}
+        onDblClick={handleDoubleClick}
+        onClick={handleClick}
         ref={stageEl}
       >
         <Layer ref={layerEl}>
-          <Rect
-            x={selectionRect.startX}
-            y={selectionRect.startY}
-            width={selectionRect.width}
-            height={selectionRect.height}
-            fill="transparent"
-            stroke="blue"
-            ref={selectionRectRef}
-            id={"sr"}
-          />
           {Object.keys(state.pieceGroups).map((keyName, i) => {
             return (
               <Group
@@ -136,6 +106,7 @@ export const ImprovSpace = () => {
                 {Object.keys(state.pieceGroups[keyName].pieceData).map(
                   (pieceName, j) => (
                     <Rect
+                      id={"piece-" + keyName + "-" + pieceName}
                       key={"piece-" + keyName + "-" + pieceName}
                       className={"piece"}
                       width={28}
@@ -148,6 +119,14 @@ export const ImprovSpace = () => {
                       visible={
                         state.pieceGroups[keyName].onDesignWall ? true : false
                       }
+                      stroke={
+                        state.selectedShapes.includes(
+                          "piece-" + keyName + "-" + pieceName
+                        )
+                          ? "black"
+                          : "white"
+                      }
+                      draggable
                     />
                   )
                 )}
@@ -155,6 +134,7 @@ export const ImprovSpace = () => {
             );
           })}
           {/* <Circle
+            key={"piece-" + 0 + "-" + 0}
             id={"c1"}
             x={50}
             y={50}
