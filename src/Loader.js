@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { useStore } from "./store";
-import Button from "@material-ui/core/Button";
+import { Button } from "@material-ui/core/";
 import { boundaryToSVG, scaleBoundaryToCanvas } from "./helpers";
 
 export const Loader = (props) => {

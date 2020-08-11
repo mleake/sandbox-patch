@@ -10,7 +10,8 @@ const initialState = {
   fabrics: {},
   uploadedFile: "",
   pieceGroups: {},
-  tool: "selecttool"
+  tool: "selecttool",
+  selectedShapes: []
 };
 
 const reducer = (state, action) => {
@@ -23,7 +24,9 @@ const reducer = (state, action) => {
         pieceGroups: {},
         selectedPieceID: "",
         fabrics: {},
-        onDesignWall: {}
+        onDesignWall: {},
+        tool: "selecttool",
+        selectedShapes: []
       };
 
     case "selectTool":
@@ -34,7 +37,19 @@ const reducer = (state, action) => {
         selectedPieceID: state.selectedPieceID,
         fabrics: state.fabrics,
         onDesignWall: state.onDesignWall,
-        tool: action.tool
+        tool: action.tool,
+        selectedShapes: state.selectedShapes
+      };
+    case "selectShapes":
+      return {
+        message: action.message,
+        pieces: state.pieces,
+        pieceGroups: state.pieceGroups,
+        selectedPieceID: state.selectedPieceID,
+        fabrics: state.fabrics,
+        onDesignWall: state.onDesignWall,
+        tool: state.tool,
+        selectedShapes: action.selectedShapes
       };
     case "loadJSON":
       console.log("loading json");
@@ -51,7 +66,8 @@ const reducer = (state, action) => {
         selectedPieceID: state.selectedPieceID,
         fabrics: state.fabrics,
         onDesignWall: state.onDesignWall,
-        tool: state.tool
+        tool: action.tool,
+        selectedShapes: state.selectedShapes
       };
     case "addFile":
       console.log("adding file", action.newFile);
@@ -62,7 +78,9 @@ const reducer = (state, action) => {
         pieceGroups: state.pieceGroups,
         uploadedFile: state.uploadedFile,
         fabrics: state.fabrics,
-        onDesignWall: state.onDesignWall
+        onDesignWall: state.onDesignWall,
+        tool: action.tool,
+        selectedShapes: state.selectedShapes
       };
     case "addFabric":
       console.log("adding fabric", action.newColor);
@@ -83,7 +101,9 @@ const reducer = (state, action) => {
         pieceGroups: state.pieceGroups,
         uploadedFile: state.uploadedFile,
         fabrics: state.fabrics,
-        onDesignWall: state.onDesignWall
+        onDesignWall: state.onDesignWall,
+        tool: action.tool,
+        selectedShapes: state.selectedShapes
       };
     case "changeFabricDims": {
       var fabric = state.fabrics[action.whichFabric];
@@ -98,7 +118,9 @@ const reducer = (state, action) => {
         pieceGroups: state.pieceGroups,
         uploadedFile: state.uploadedFile,
         fabrics: state.fabrics,
-        onDesignWall: state.onDesignWall
+        onDesignWall: state.onDesignWall,
+        tool: action.tool,
+        selectedShapes: state.selectedShapes
       };
     }
     case "addPiece":
@@ -112,7 +134,9 @@ const reducer = (state, action) => {
         pieceGroups: state.pieceGroups,
         selectedPieceID: state.selectedPieceID,
         fabrics: state.fabrics,
-        onDesignWall: state.onDesignWall
+        onDesignWall: state.onDesignWall,
+        tool: action.tool,
+        selectedShapes: state.selectedShapes
       };
     case "addPieceGroup":
       var newPieceGroups = action.newPieceGroups;
@@ -130,7 +154,9 @@ const reducer = (state, action) => {
         pieceGroups: state.pieceGroups,
         selectedPieceID: state.selectedPieceID,
         fabrics: state.fabrics,
-        onDesignWall: state.onDesignWall
+        onDesignWall: state.onDesignWall,
+        tool: action.tool,
+        selectedShapes: state.selectedShapes
       };
     case "loadPieceGroup":
       var keyName = action.whichPiece;
@@ -148,7 +174,9 @@ const reducer = (state, action) => {
         selectedPieceID: newState.selectedPieceID,
         fabrics: newState.fabrics,
         onDesignWall: newState.onDesignWall,
-        loadedPieceGroup: true
+        loadedPieceGroup: true,
+        tool: action.tool,
+        selectedShapes: state.selectedShapes
       };
       return returnVal;
     case "selectPiece":
@@ -158,7 +186,9 @@ const reducer = (state, action) => {
         pieceGroups: state.pieceGroups,
         selectedPieceID: action.selectedPieceID,
         fabrics: state.fabrics,
-        onDesignWall: state.onDesignWall
+        onDesignWall: state.onDesignWall,
+        tool: action.tool,
+        selectedShapes: state.selectedShapes
       };
     case "changePieceWidth":
       var keyName = action.whichPiece;
@@ -169,7 +199,9 @@ const reducer = (state, action) => {
         pieceGroups: state.pieceGroups,
         uploadedFile: state.uploadedFile,
         fabrics: state.fabrics,
-        onDesignWall: state.onDesignWall
+        onDesignWall: state.onDesignWall,
+        tool: action.tool,
+        selectedShapes: state.selectedShapes
       };
     case "changePieceHeight":
       var keyName = action.whichPiece;
@@ -180,7 +212,9 @@ const reducer = (state, action) => {
         pieceGroups: state.pieceGroups,
         uploadedFile: state.uploadedFile,
         fabrics: state.fabrics,
-        onDesignWall: state.onDesignWall
+        onDesignWall: state.onDesignWall,
+        tool: action.tool,
+        selectedShapes: state.selectedShapes
       };
     case "movePiece":
       // var newAttrs = action.locations.attrs;
@@ -212,7 +246,9 @@ const reducer = (state, action) => {
         pieceGroups: state.pieceGroups,
         selectedPieceID: state.selectedPieceID,
         fabrics: state.fabrics,
-        onDesignWall: state.onDesignWall
+        onDesignWall: state.onDesignWall,
+        tool: action.tool,
+        selectedShapes: state.selectedShapes
       };
     case "addSeam":
       var newState = Object.assign({}, state);
@@ -256,7 +292,9 @@ const reducer = (state, action) => {
         selectedPieceID: state.selectedPieceID,
         fabrics: state.fabrics,
         onDesignWall: state.onDesignWall,
-        addedSeam: true
+        addedSeam: true,
+        tool: action.tool,
+        selectedShapes: state.selectedShapes
       };
       state = Object.assign({}, returnVal);
       console.log(state);
@@ -276,7 +314,9 @@ const reducer = (state, action) => {
         selectedPieceID: state.selectedPieceID,
         fabrics: state.fabrics,
         onDesignWall: state.onDesignWall,
-        addedSeam: true
+        addedSeam: true,
+        tool: action.tool,
+        selectedShapes: state.selectedShapes
       };
       state = returnVal;
       console.log(state);
@@ -291,7 +331,9 @@ const reducer = (state, action) => {
         selectedPieceID: state.selectedPieceID,
         fabrics: state.fabrics,
         onDesignWall: state.onDesignWall,
-        recoloredPieceGroup: true
+        recoloredPieceGroup: true,
+        tool: action.tool,
+        selectedShapes: state.selectedShapes
       };
       state = returnVal;
       console.log(state);
@@ -324,7 +366,9 @@ const reducer = (state, action) => {
         pieceGroups: state.pieceGroups,
         selectedPieceID: state.selectedPieceID,
         fabrics: state.fabrics,
-        onDesignWall: state.onDesignWall
+        onDesignWall: state.onDesignWall,
+        tool: action.tool,
+        selectedShapes: state.selectedShapes
       };
     case "finishEdit":
       // for (var i=0; i<Object.keys(state.pieces).length; i++) {
@@ -354,7 +398,9 @@ const reducer = (state, action) => {
         selectedPieceID: state.selectedPieceID,
         fabrics: state.fabrics,
         uploadedFile: state.uploadedFile,
-        onDesignWall: state.onDesignWall
+        onDesignWall: state.onDesignWall,
+        tool: action.tool,
+        selectedShapes: state.selectedShapes
       };
     default:
       throw new Error(`Unhandled action type: ${action.type}`);

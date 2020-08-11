@@ -7,9 +7,9 @@ import { GrUndo, GrRedo } from "react-icons/gr";
 import { MdDelete, MdAddToPhotos } from "react-icons/md";
 import { RiSliceLine } from "react-icons/ri";
 import { Toolbar, Typography } from "@material-ui/core";
-import IconButton from "@material-ui/core/Button";
-import Button from "@material-ui/core/Button";
-import { makeStyles } from "@material-ui/core/styles";
+import { IconButton } from "@material-ui/core";
+import { Button } from "@material-ui/core";
+import { makeStyles } from "@material-ui/core";
 import { useStore } from "./store";
 
 const useStyles = makeStyles((theme) => ({
@@ -48,10 +48,15 @@ export const SewToolBar = () => {
       setHelperText("delete selected element");
     }
   }
+
+  function handleHover(ev) {
+    var tool = ev.currentTarget.value;
+    fillHelperText(tool);
+  }
+
   function handleClick(ev) {
     var tool = ev.currentTarget.value;
     setLocalTool(tool);
-    fillHelperText(tool);
     dispatch({
       type: "selectTool",
       message: "selectTool",
@@ -70,7 +75,7 @@ export const SewToolBar = () => {
             className={state.tool === "selecttool" ? "icbutton" : "IconButton"}
             value="selecttool"
             onClick={(e) => handleClick(e)}
-            selected={true}
+            selected={state.tool === "selecttool"}
           >
             <GiArrowCursor />
             <div>select</div>
@@ -81,7 +86,7 @@ export const SewToolBar = () => {
             className={state.tool === "slicetool" ? "icbutton" : "IconButton"}
             value="slicetool"
             onClick={(e) => handleClick(e)}
-            selected={true}
+            selected={state.tool === "slicetool"}
           >
             <RiSliceLine />
             <div>cut</div>
@@ -92,7 +97,8 @@ export const SewToolBar = () => {
             className={state.tool === "sewtool" ? "icbutton" : "IconButton"}
             value="sewtool"
             onClick={(e) => handleClick(e)}
-            selected={true}
+            selected={false}
+            disabled={state.selectedShapes.length < 2}
           >
             <GiSewingNeedle />
             <div>sew</div>
@@ -105,7 +111,8 @@ export const SewToolBar = () => {
             }
             value="duplicatetool"
             onClick={(e) => handleClick(e)}
-            selected={true}
+            selected={false}
+            disabled={state.selectedShapes.length < 1}
           >
             <MdAddToPhotos />
             <div>duplicate</div>

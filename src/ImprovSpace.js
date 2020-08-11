@@ -15,18 +15,21 @@ export const ImprovSpace = () => {
   const [selectionRect, setSelectionRect] = useState({});
   const [startedSelection, setStartedSelection] = useState(false);
   const [draggedSelection, setDraggedSelection] = useState(false);
-  const [selectedShapes, setSelectedShapes] = useState([]);
 
   function mouseDownSelect(event) {
     //ignore clicks on shapes
     if (event.target !== event.target.getStage()) {
       return;
     }
+    dispatch({
+      type: "selectShapes",
+      message: "selectShapes",
+      selectedShapes: []
+    });
     const pos = stageEl.current.getPointerPosition();
     setSelectionRect({ startX: pos.x, startY: pos.y, width: 0, height: 0 });
     setStartedSelection(true);
     setDraggedSelection(false);
-    setSelectedShapes([]);
   }
 
   function mouseMoveSelect(event) {
@@ -58,7 +61,7 @@ export const ImprovSpace = () => {
       };
       setSelectionRect(annotationToAdd);
 
-      var shapes = stageEl.current.find("Circle").toArray();
+      var shapes = stageEl.current.find(".piece").toArray();
       if (shapes.length > 0) {
         var sr = stageEl.current.findOne("#sr");
         var box = sr.getClientRect();
@@ -69,32 +72,35 @@ export const ImprovSpace = () => {
         );
         var selectedIds = [];
         selected.forEach((shape) => selectedIds.push(shape.id()));
-        setSelectedShapes(selectedIds);
+        dispatch({
+          type: "selectShapes",
+          message: "selectShapes",
+          selectedShapes: selectedIds
+        });
       }
-    } else {
-      setSelectedShapes([]);
     }
+    setDraggedSelection(false);
     setStartedSelection(false);
-    setSelectionRect({});
+    setSelectionRect({ startX: pos.x, startY: pos.y, width: 0, height: 0 });
   }
 
   function handleStageMouseDown(e) {
     e.preventDefault;
-    console.log(stageEl.current.getPointerPosition());
-    if (state.tool === "selecttool") {
+    if (state.tool == "selecttool") {
       mouseDownSelect(e);
     }
   }
 
   function handleStageMouseMove(e) {
-    if (state.tool === "selecttool") {
+    if (state.tool == "selecttool") {
       mouseMoveSelect(e);
     }
   }
 
   function handleStageMouseUp(e) {
-    if (state.tool === "selecttool") {
+    if (state.tool == "selecttool") {
       mouseUpSelect(e);
+      console.log(state);
     }
   }
 
@@ -124,15 +130,14 @@ export const ImprovSpace = () => {
             return (
               <Group
                 name={"improvGroup"}
-                id={keyName}
+                id={"key-" + keyName}
                 key={"group-" + keyName}
-                draggable
-                onDrag={(e) => draggingGroup(e)}
               >
                 {Object.keys(state.pieceGroups[keyName].pieceData).map(
                   (pieceName, j) => (
                     <Rect
                       key={"piece-" + keyName + "-" + pieceName}
+                      className={"piece"}
                       width={28}
                       height={28}
                       x={0}
@@ -149,15 +154,14 @@ export const ImprovSpace = () => {
               </Group>
             );
           })}
-          <Circle
+          {/* <Circle
             id={"c1"}
             x={50}
             y={50}
             fill={"red"}
             width={40}
             height={40}
-            stroke={selectedShapes.includes("c1") ? "black" : "white"}
-            draggable
+            stroke={state.selectedShapes.includes("c1") ? "black" : "white"}
           />
           <Circle
             id={"c2"}
@@ -166,9 +170,8 @@ export const ImprovSpace = () => {
             fill={"pink"}
             width={30}
             height={30}
-            stroke={selectedShapes.includes("c2") ? "black" : "white"}
-            draggable
-          />
+            stroke={state.selectedShapes.includes("c2") ? "black" : "white"}
+          /> */}
         </Layer>
       </Stage>
     </div>

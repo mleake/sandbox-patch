@@ -6,9 +6,9 @@ import { StoreProvider } from "./store";
 import { ImprovSpace } from "./ImprovSpace";
 import { Layout } from "./Layout";
 import * as JSONdata from "./data.json";
-import { Container, Row, Col, Form } from "react-bootstrap";
+import { Container, Row, Col } from "react-bootstrap";
 
-import { boundaryToSVG, scaleBoundaryToCanvas } from "./helpers";
+// import { boundaryToSVG, scaleBoundaryToCanvas } from "./helpers";
 import "./styles.css";
 
 export default class App extends React.Component {
