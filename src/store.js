@@ -74,6 +74,34 @@ const reducer = (state, action) => {
         tool: state.tool,
         selectedShapes: state.selectedShapes
       };
+    case "sewPieces":
+      var newPieceGroupId = Object.keys(state.pieceGroups).length;
+      state.pieceGroups[newPieceGroupId] = { pieceData: {} };
+      state.pieceGroups[newPieceGroupId].idx = newPieceGroupId;
+      state.onDesignWall[newPieceGroupId] = true;
+      state.pieceGroups[newPieceGroupId].onDesignWall = true;
+      var pieceId = 0;
+      action.piecesToSew.forEach((pgIdx, idx) => {
+        var currentPieceGroup = state.pieceGroups[pgIdx];
+
+        Object.keys(currentPieceGroup.pieceData).forEach((pieceKey, pidx) => {
+          state.pieceGroups[newPieceGroupId].pieceData[pieceId] =
+            currentPieceGroup.pieceData[pieceKey];
+          state.pieceGroups[newPieceGroupId].pieceData[pieceId].idx = pieceId;
+          pieceId += 1;
+        });
+        delete state.pieceGroups[pgIdx]; //delete whole piece group?
+      });
+      return {
+        message: action.message,
+        pieces: state.pieces,
+        pieceGroups: state.pieceGroups,
+        selectedPieceID: state.selectedPieceID,
+        fabrics: state.fabrics,
+        onDesignWall: state.onDesignWall,
+        tool: state.tool,
+        selectedShapes: state.selectedShapes
+      };
     case "loadJSON":
       console.log("loading json");
       var idx = 0;

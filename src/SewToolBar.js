@@ -88,21 +88,19 @@ export const SewToolBar = () => {
   }
 
   function handleSew() {
-    var piecesToMove = [];
+    var piecesToSew = [];
     state.selectedShapes.map((shapeId, i) => {
       var whichPieceGroup = shapeId.split("-")[1];
-      var whichPiece = shapeId.split("-")[2];
-      piecesToMove.push({
-        pieceGroup: whichPieceGroup,
-        piece: whichPiece
-      });
-      dispatch({
-        type: "addSeam",
-        message: "addSeam",
-        piecesToMove: piecesToMove
-      });
-      console.log(state);
+      if (piecesToSew.indexOf(whichPieceGroup) < 0) {
+        piecesToSew.push(whichPieceGroup);
+      }
     });
+    dispatch({
+      type: "sewPieces",
+      message: "sewPieces",
+      piecesToSew: piecesToSew
+    });
+    console.log("state after sew", state);
   }
 
   return (
