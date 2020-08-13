@@ -11,6 +11,7 @@ import { IconButton } from "@material-ui/core";
 import { Button } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core";
 import { useStore } from "./store";
+import { pink100 } from "material-ui/styles/colors";
 
 const useStyles = makeStyles((theme) => ({
   iconButton: {
@@ -58,9 +59,7 @@ export const SewToolBar = () => {
     var tool = ev.currentTarget.value;
     setLocalTool(tool);
 
-    if (tool == "sewtool") {
-      handleSew();
-    } else if (tool == "duplicatetool") {
+    if (tool == "duplicatetool") {
       handleDuplicate();
     }
     dispatch({
@@ -85,22 +84,6 @@ export const SewToolBar = () => {
         piecesToDuplicate: piecesToDuplicate
       });
     });
-  }
-
-  function handleSew() {
-    var piecesToSew = [];
-    state.selectedShapes.map((shapeId, i) => {
-      var whichPieceGroup = shapeId.split("-")[1];
-      if (piecesToSew.indexOf(whichPieceGroup) < 0) {
-        piecesToSew.push(whichPieceGroup);
-      }
-    });
-    dispatch({
-      type: "sewPieces",
-      message: "sewPieces",
-      piecesToSew: piecesToSew
-    });
-    console.log("state after sew", state);
   }
 
   return (
@@ -232,6 +215,7 @@ export const SewToolBar = () => {
       </Toolbar>
       <p className="helperText">{helperText}</p>
       {localTool === "slicetool" ? <Button>cut</Button> : null}
+      <p className="errorMessage">{state.errorMessage}</p>
     </div>
   );
 };
