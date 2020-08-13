@@ -12,6 +12,8 @@ import { Button } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core";
 import { useStore } from "./store";
 import { pink100 } from "material-ui/styles/colors";
+import { CirclePicker } from "react-color";
+import { Stage, Layer, Path, Group, Line, Rect, Circle } from "react-konva";
 
 const useStyles = makeStyles((theme) => ({
   iconButton: {
@@ -24,6 +26,8 @@ export const SewToolBar = () => {
   const { state, dispatch } = useStore();
   const [localTool, setLocalTool] = useState("");
   const [helperText, setHelperText] = useState("");
+  const [showColorPalette, setShowColorPalette] = useState(false);
+  const [showColors, setShowColors] = useState([]);
   const classes = useStyles();
 
   function fillHelperText(tool) {
@@ -47,6 +51,8 @@ export const SewToolBar = () => {
       setHelperText("undo last action");
     } else if (tool === "deletetool") {
       setHelperText("delete selected element");
+    } else {
+      setHelperText("");
     }
   }
 
@@ -62,6 +68,9 @@ export const SewToolBar = () => {
     if (tool == "duplicatetool") {
       handleDuplicate();
     }
+    if (tool == "colortool") {
+      showColorChoices();
+    }
     dispatch({
       type: "selectTool",
       message: "selectTool",
@@ -76,92 +85,153 @@ export const SewToolBar = () => {
     });
   }
 
+  function handleRecolor() {
+    setShowColorPalette(true);
+  }
+
+  function getColorsFromFabrics() {
+    var colors = [];
+    Object.keys(state.fabrics).map((keyName, i) => {
+      var fabric = state.fabrics[keyName];
+      colors.push(fabric.color);
+    });
+    if (colors.length < 1) {
+      return ["#f44336", "#e91e63", "#9c27b0", "#673ab7"];
+    }
+    return colors;
+  }
+
+  function selectNewColor(color, pgId, pieceId) {
+    console.log("colorpg", state.selectedShapes);
+    setShowColors([]);
+    dispatch({
+      type: "recolorPieceGroup",
+      message: "recolorPieceGroup",
+      whichPieceGroup: pgId,
+      whichPiece: pieceId,
+      color: color.hex
+    });
+  }
+
+  function showColorChoices() {
+    var newShowColors = JSON.parse(JSON.stringify(showColors));
+    for (var i = 0; i < state.selectedShapes.length; i++) {
+      var pgId = state.selectedShapes[i];
+      if (newShowColors.includes(pgId)) {
+        newShowColors = newShowColors.filter((item) => item !== pgId);
+        setShowColors(newShowColors);
+      } else {
+        newShowColors.push(pgId);
+        setShowColors(newShowColors);
+      }
+    }
+  }
+
+  function createButton(tool) {
+    var symbol;
+    var buttonText;
+    var disabledOne = false;
+    var disabledTwo = false;
+    if (tool == "selecttool") {
+      buttonText = "select";
+      symbol = <GiArrowCursor />;
+    } else if (tool == "slicetool") {
+      buttonText = "cut";
+      symbol = <RiSliceLine />;
+      disabledOne = true;
+    } else if (tool == "sewtool") {
+      buttonText = "sew";
+      symbol = <GiSewingNeedle />;
+      disabledTwo = true;
+    } else if (tool == "duplicatetool") {
+      buttonText = "duplicate";
+      symbol = <MdAddToPhotos />;
+      disabledOne = true;
+    } else if (tool == "colortool") {
+      buttonText = "recolor";
+      symbol = <PaletteIcon />;
+      disabledOne = true;
+    } else if (tool == "resizeTool") {
+      buttonText = "resize";
+      symbol = <GiResize />;
+      disabledOne = true;
+    } else if (tool == "croptool") {
+      buttonText = "crop";
+      symbol = <CropIcon />;
+      disabledOne = true;
+    } else if (tool == "redotool") {
+      buttonText = "redo";
+      symbol = <GrRedo />;
+    } else if (tool == "undotool") {
+      buttonText = "undo";
+      symbol = <GrUndo />;
+    } else if (tool == "deletetool") {
+      buttonText = "delete";
+      symbol = <MdDelete />;
+      disabledOne = true;
+    }
+    if (disabledOne) {
+      return (
+        <IconButton
+          classes={{ label: classes.iconButton }}
+          className={state.tool === tool ? "icbutton" : "IconButton"}
+          value={tool}
+          onClick={(e) => handleClick(e)}
+          onMouseEnter={(e) => handleHover(e)}
+          onMouseExit={(e) => fillHelperText("")}
+          selected={state.tool === tool}
+          disabled={state.selectedShapes.length < 1}
+        >
+          {symbol}
+          <div>{buttonText}</div>
+        </IconButton>
+      );
+    } else if (disabledTwo) {
+      return (
+        <IconButton
+          classes={{ label: classes.iconButton }}
+          className={state.tool === tool ? "icbutton" : "IconButton"}
+          value={tool}
+          onClick={(e) => handleClick(e)}
+          onMouseEnter={(e) => handleHover(e)}
+          onMouseExit={(e) => fillHelperText("")}
+          selected={state.tool === tool}
+          disabled={state.selectedShapes.length < 2}
+        >
+          {symbol}
+          <div>{buttonText}</div>
+        </IconButton>
+      );
+    } else {
+      return (
+        <IconButton
+          classes={{ label: classes.iconButton }}
+          className={state.tool === tool ? "icbutton" : "IconButton"}
+          value={tool}
+          onClick={(e) => handleClick(e)}
+          onMouseEnter={(e) => handleHover(e)}
+          onMouseExit={(e) => fillHelperText("")}
+          selected={state.tool === tool}
+        >
+          {symbol}
+          <div>{buttonText}</div>
+        </IconButton>
+      );
+    }
+  }
   return (
     <div className="ToolBar">
       <Toolbar position="static">
         <Typography
           style={{ borderRight: "0.1em solid black", padding: "0.5em" }}
         >
-          <IconButton
-            classes={{ label: classes.iconButton }}
-            className={state.tool === "selecttool" ? "icbutton" : "IconButton"}
-            value="selecttool"
-            onClick={(e) => handleClick(e)}
-            selected={state.tool === "selecttool"}
-          >
-            <GiArrowCursor />
-            <div>select</div>
-          </IconButton>
-
-          <IconButton
-            classes={{ label: classes.iconButton }}
-            className={state.tool === "slicetool" ? "icbutton" : "IconButton"}
-            value="slicetool"
-            onClick={(e) => handleClick(e)}
-            selected={state.tool === "slicetool"}
-          >
-            <RiSliceLine />
-            <div>cut</div>
-          </IconButton>
-
-          <IconButton
-            classes={{ label: classes.iconButton }}
-            className={state.tool === "sewtool" ? "icbutton" : "IconButton"}
-            value="sewtool"
-            onClick={(e) => handleClick(e)}
-            selected={false}
-            disabled={state.selectedShapes.length < 2}
-          >
-            <GiSewingNeedle />
-            <div>sew</div>
-          </IconButton>
-
-          <IconButton
-            classes={{ label: classes.iconButton }}
-            className={
-              state.tool === "duplicatetool" ? "icbutton" : "IconButton"
-            }
-            value="duplicatetool"
-            onClick={(e) => handleClick(e)}
-            selected={false}
-            disabled={state.selectedShapes.length < 1}
-          >
-            <MdAddToPhotos />
-            <div>duplicate</div>
-          </IconButton>
-
-          <IconButton
-            classes={{ label: classes.iconButton }}
-            className={state.tool === "colortool" ? "icbutton" : "IconButton"}
-            value="colortool"
-            onClick={(e) => handleClick(e)}
-            selected={true}
-          >
-            <PaletteIcon />
-            <div>recolor</div>
-          </IconButton>
-
-          <IconButton
-            classes={{ label: classes.iconButton }}
-            className={state.tool === "resizetool" ? "icbutton" : "IconButton"}
-            value="resizetool"
-            onClick={(e) => handleClick(e)}
-            selected={true}
-          >
-            <GiResize />
-            <div>resize</div>
-          </IconButton>
-
-          <IconButton
-            classes={{ label: classes.iconButton }}
-            className={state.tool === "croptool" ? "icbutton" : "IconButton"}
-            value="croptool"
-            onClick={(e) => handleClick(e)}
-            selected={true}
-          >
-            <CropIcon />
-            <div>crop</div>
-          </IconButton>
+          {createButton("selecttool")}
+          {createButton("slicetool")}
+          {createButton("sewtool")}
+          {createButton("duplicatetool")}
+          {createButton("colortool")}
+          {createButton("resizetool")}
+          {createButton("croptool")}
         </Typography>
         <Typography
           style={{
@@ -169,43 +239,47 @@ export const SewToolBar = () => {
             textAlign: "right"
           }}
         >
-          <IconButton
-            classes={{ label: classes.iconButton }}
-            className={state.tool === "redoTool" ? "icbutton" : "IconButton"}
-            value="redotool"
-            onClick={(e) => handleClick(e)}
-            selected={true}
-          >
-            <GrRedo />
-            <div>redo</div>
-          </IconButton>
-
-          <IconButton
-            classes={{ label: classes.iconButton }}
-            className={state.tool === "undoTool" ? "icbutton" : "IconButton"}
-            value="undotool"
-            onClick={(e) => handleClick(e)}
-            selected={true}
-          >
-            <GrUndo />
-            <div>undo</div>
-          </IconButton>
-
-          <IconButton
-            classes={{ label: classes.iconButton }}
-            className={state.tool === "deleteTool" ? "icbutton" : "IconButton"}
-            value="deletetool"
-            onClick={(e) => handleClick(e)}
-            selected={true}
-          >
-            <MdDelete />
-            <div>delete</div>
-          </IconButton>
+          {createButton("redotool")}
+          {createButton("undotool")}
+          {createButton("deletetool")}
         </Typography>
       </Toolbar>
       <p className="helperText">{helperText}</p>
       {localTool === "slicetool" ? <Button>cut</Button> : null}
       <p className="errorMessage">{state.errorMessage}</p>
+      {Object.keys(state.pieceGroups).map((keyName, i) => (
+        <>
+          {Object.keys(state.pieceGroups[keyName].pieceData).map(
+            (pieceName, j) => (
+              <>
+                {showColors.includes(keyName) && (
+                  <>
+                    <Stage width={30} height={30}>
+                      <Layer>
+                        <Rect
+                          width={28}
+                          height={28}
+                          x={0}
+                          y={0}
+                          fill={
+                            state.pieceGroups[keyName].pieceData[pieceName]
+                              .color
+                          }
+                        />
+                      </Layer>
+                    </Stage>
+
+                    <CirclePicker
+                      colors={getColorsFromFabrics(keyName, pieceName)}
+                      onChange={(e) => selectNewColor(e, keyName, pieceName)}
+                    />
+                  </>
+                )}
+              </>
+            )
+          )}
+        </>
+      ))}
     </div>
   );
 };

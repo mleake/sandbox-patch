@@ -250,24 +250,11 @@ const reducer = (state, action) => {
     //   state = returnVal;
     //   console.log(state);
     //   return returnVal;
-    // case "recolorPieceGroup":
-    //   var pieces = state.pieceGroups[action.whichPieceGroup].pieceData;
-    //   pieces[action.whichPiece].color = action.color;
-    //   var returnVal = {
-    //     message: action.message,
-    //     pieces: state.pieces,
-    //     pieceGroups: state.pieceGroups,
-    //     selectedPieceID: state.selectedPieceID,
-    //     fabrics: state.fabrics,
-    //     onDesignWall: state.onDesignWall,
-    //     recoloredPieceGroup: true,
-    //     tool: action.tool,
-    //     selectedShapes: state.selectedShapes,
-    //     errorMessage: state.errorMessage
-    //   };
-    //   state = returnVal;
-    //   console.log(state);
-    //   return returnVal;
+    case "recolorPieceGroup":
+      state.pieceGroups[action.whichPieceGroup].pieceData[
+        action.whichPiece
+      ].color = action.color;
+      return state;
     // case "cutPiece":
     //   console.log(action.replacePiece, action.newPiece);
     //   var newState = Object.assign({}, state);
