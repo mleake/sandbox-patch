@@ -73,6 +73,7 @@ const reducer = (state, action) => {
         state.pieceGroups[newPieceGroupId].idx = newPieceGroupId;
         state.onDesignWall[newPieceGroupId] = true;
         state.pieceGroups[newPieceGroupId].onDesignWall = true;
+        state.pieceGroups[newPieceGroupId].isReal = false;
       });
       state.message = action.message;
       return state;
@@ -82,8 +83,10 @@ const reducer = (state, action) => {
       state.pieceGroups[newPieceGroupId].idx = newPieceGroupId;
       state.onDesignWall[newPieceGroupId] = true;
       state.pieceGroups[newPieceGroupId].onDesignWall = true;
+      state.pieceGroups[newPieceGroupId].isReal = false;
       var pieceId = 0;
       console.log("pts", action.piecesToSew);
+
       action.piecesToSew.forEach((pgIdx, idx) => {
         var currentPieceGroup = state.pieceGroups[pgIdx];
 
@@ -137,6 +140,7 @@ const reducer = (state, action) => {
       console.log(newPieceGroups);
       for (var i = 0; i < Object.keys(newPieceGroups).length; i++) {
         state.pieceGroups[idx] = newPieceGroups[i];
+        state.pieceGroups[idx].isReal = true;
         state.onDesignWall[idx] = false;
         idx += 1;
       }
@@ -251,43 +255,39 @@ const reducer = (state, action) => {
     //   console.log(state);
     //   return returnVal;
     case "recolorPieceGroup":
-      state.pieceGroups[action.whichPieceGroup].pieceData[
+      var newState = Object.assign({}, state);
+      newState.pieceGroups[action.whichPieceGroup].pieceData[
         action.whichPiece
       ].color = action.color;
-      return state;
-    // case "cutPiece":
-    //   console.log(action.replacePiece, action.newPiece);
-    //   var newState = Object.assign({}, state);
-    //   //add newPiece
-    //   var newPieceGroupId = Object.keys(state.pieceGroups).length;
-    //   newState.pieceGroups[newPieceGroupId] = {};
-    //   newState.pieceGroups[newPieceGroupId].idx = newPieceGroupId;
-    //   newState.pieceGroups[newPieceGroupId].pieceData = {};
-    //   newState.pieceGroups[newPieceGroupId].pieceData[0] = action.newPiece;
-    //   newState.pieceGroups[newPieceGroupId].onDesignWall = true;
-    //   newState.pieceGroups[newPieceGroupId].width =
-    //     newState.pieceGroups[action.whichPieceGroup].width;
-    //   newState.pieceGroups[newPieceGroupId].height =
-    //     newState.pieceGroups[action.whichPieceGroup].height;
-    //   newState.onDesignWall[newPieceGroupId] = true;
-    //   //replacePiece with half
-    //   newState.pieceGroups[action.whichPieceGroup].pieceData[
-    //     action.whichPiece
-    //   ] = action.replacePiece;
-    //   newState.onDesignWall[action.whichPieceGroup] = true;
-    //   state = newState;
-    //   console.log("after", state);
-    //   return {
-    //     message: action.message,
-    //     pieces: state.pieces,
-    //     pieceGroups: state.pieceGroups,
-    //     selectedPieceID: state.selectedPieceID,
-    //     fabrics: state.fabrics,
-    //     onDesignWall: state.onDesignWall,
-    //     tool: action.tool,
-    //     selectedShapes: state.selectedShapes,
-    //     errorMessage: state.errorMessage
-    //   };
+      newState.pieceGroups[action.whichPieceGroup].isReal = false;
+      return newState;
+    case "cutPiece":
+      console.log(action.replacePiece, action.newPiece);
+      var newState = Object.assign({}, state);
+      //add newPiece
+      var newPieceGroupId = Object.keys(state.pieceGroups).length;
+      newState.pieceGroups[newPieceGroupId] = {};
+      newState.pieceGroups[newPieceGroupId].idx = newPieceGroupId;
+      newState.pieceGroups[newPieceGroupId].pieceData = {};
+      newState.pieceGroups[newPieceGroupId].pieceData[0] = action.newPiece;
+      newState.pieceGroups[newPieceGroupId].onDesignWall = true;
+      newState.pieceGroups[newPieceGroupId].isReal = false;
+      newState.pieceGroups[newPieceGroupId].width =
+        newState.pieceGroups[action.whichPieceGroup].width;
+      newState.pieceGroups[newPieceGroupId].height =
+        newState.pieceGroups[action.whichPieceGroup].height;
+      newState.onDesignWall[newPieceGroupId] = true;
+      //replacePiece with half
+      newState.pieceGroups[action.whichPieceGroup].pieceData[
+        action.whichPiece
+      ] = action.replacePiece;
+      newState.pieceGroups[action.whichPieceGroup].isReal = false;
+      newState.onDesignWall[action.whichPieceGroup] = true;
+      var selectedShapes = state.selectedShapes.filter(
+        (item) => item !== action.whichPieceGroup
+      );
+      newState.selectedShapes = selectedShapes;
+      return newState;
     case "finishEdit":
       // for (var i=0; i<Object.keys(state.pieces).length; i++) {
       //   var pieceKey = Object.keys(state.pieces)[i];

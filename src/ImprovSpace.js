@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import Konva from "konva";
 import { Stage, Layer, Path, Group, Line, Rect, Circle } from "react-konva";
 import { splitShape, boundaryToSVG, closestEdgeToPoint } from "./helpers";
+import { toPoints } from "svg-points";
 import ImprovTransformer from "./ImprovTransformer";
 import { useStore } from "./store";
 import { Box } from "@material-ui/core";
@@ -12,23 +13,46 @@ export const ImprovSpace = () => {
   const layerEl = React.createRef();
   const selectionRectRef = React.createRef();
   const tr = React.createRef();
+  const [startCut, setStartCut] = useState(false);
+  const [finishedCut, setFinishedCut] = useState(false);
+  const [cutPoints, setCutPoints] = useState({
+    start: { x: 0, y: 0 },
+    end: { x: 0, y: 0 }
+  });
+
+  function getRelativePointerPosition(node) {
+    //this function will return pointer position relative to the passed node
+    var transform = node.getAbsoluteTransform().copy();
+    // to detect relative position we need to invert transform
+    transform.invert();
+
+    // get pointer (say mouse or touch) position
+    var pos = node.getStage().getPointerPosition();
+
+    // now we can find relative point
+    return transform.point(pos);
+  }
 
   function handleStageMouseDown(e) {
     e.preventDefault;
-    if (state.tool == "selecttool") {
-      mouseDownSelect(e);
+    console.log("mouse down");
+    console.log(state.tool);
+    if (state.tool == "slicetool") {
+      beginCut(e);
     }
   }
 
   function handleStageMouseMove(e) {
-    if (state.tool == "selecttool") {
-      mouseMoveSelect(e);
+    console.log("mouse move");
+    if (state.tool == "slicetool") {
+      moveCut(e);
     }
   }
 
   function handleStageMouseUp(e) {
-    if (state.tool == "selecttool") {
-      mouseUpSelect(e);
+    console.log("mouse up");
+    if (state.tool == "slicetool") {
+      endCut(e);
       console.log(state);
     }
   }
@@ -160,8 +184,135 @@ export const ImprovSpace = () => {
   }
 
   function handleMouseMove() {
-    handleSew();
+    if (state.tool == "sewtool") {
+      handleSew();
+    } else if (state.tool == "slicetool") {
+      moveCut();
+    }
   }
+
+  function beginCut(e) {
+    if (!startCut) {
+      var pos = getRelativePointerPosition(layerEl.current);
+      var start = { x: pos.x, y: pos.y };
+      setStartCut(true);
+      setFinishedCut(false);
+      setCutPoints({ start: start, end: start });
+    }
+  }
+
+  function moveCut(e) {
+    if (startCut) {
+      var pos = getRelativePointerPosition(layerEl.current);
+      setCutPoints({
+        start: cutPoints.start,
+        end: { x: pos.x, y: pos.y }
+      });
+    }
+  }
+
+  function endCut(e) {
+    if (startCut) {
+      var pos = getRelativePointerPosition(layerEl.current);
+      setCutPoints({
+        start: cutPoints.start,
+        end: { x: pos.x, y: pos.y }
+      });
+      cutPieceFn(cutPoints.start, cutPoints.end);
+      setStartCut(false);
+      setFinishedCut(true);
+      setCutPoints({
+        start: { x: 0, y: 0 },
+        end: { x: 0, y: 0 }
+      });
+      dispatch({
+        type: "selectTool",
+        message: "selectTool",
+        tool: "selecttool"
+      });
+    }
+  }
+
+  function cutPieceFn(lineStart, lineEnd) {
+    //find all the visible shapes
+    var shapes = stageEl.current.find(".improvShape");
+    var selectedShapes = shapes.filter((shape) => shape.id());
+    var splitPiece = false;
+    selectedShapes.forEach((element) => {
+      var t = element.getAbsoluteTransform().getTranslation();
+      console.log(t);
+      var xOffset = t.x;
+      var yOffset = t.y;
+      var name = element.id();
+      var i = name.split("-")[1];
+      var j = name.split("-")[2];
+      var data = element.data();
+      var path = { type: "path", d: data };
+      data = toPoints(path);
+      console.log(data, lineStart, lineEnd, xOffset, yOffset);
+      var absoluteTransform = element.getAbsoluteTransform().decompose();
+      console.log(absoluteTransform);
+      console.log(element.x() + xOffset, element.y() + yOffset);
+      var newBoundaries = splitShape(
+        data,
+        lineStart,
+        lineEnd,
+        xOffset,
+        yOffset
+      );
+      console.log(newBoundaries);
+      if (Object.keys(newBoundaries).length == 2) {
+        var replacePiece = state.pieceGroups[i].pieceData[j];
+        replacePiece.scaledBoundary = newBoundaries[0];
+        replacePiece.svg = boundaryToSVG(newBoundaries[0]);
+        replacePiece.x = element.x();
+        replacePiece.y = element.y();
+
+        var newPiece = Object.assign({}, replacePiece);
+        newPiece.scaledBoundary = newBoundaries[1];
+        newPiece.svg = boundaryToSVG(newBoundaries[1]);
+        newPiece.x = absoluteTransform.x;
+        newPiece.y = absoluteTransform.y; //need to get transformation
+
+        splitPiece = true;
+
+        var json = stageEl.current.toJSON();
+        var newData = {};
+        var dataURL = stageEl.current.toDataURL();
+
+        var shapes = stageEl.current.find(".improvShape");
+        var selectedShapes = shapes.filter((shape) => shape.isVisible());
+        var maxX = 0;
+        var maxY = 0;
+        selectedShapes.forEach((element) => {
+          var rect = element.getClientRect();
+          var x = rect.x + rect.width;
+          var y = rect.y + rect.height;
+          console.log(x, y);
+          if (x > maxX) {
+            maxX = x;
+          }
+          if (y > maxY) {
+            maxY = y;
+          }
+        });
+        console.log(selectedShapes);
+
+        dispatch({
+          type: "cutPiece",
+          message: "cutPiece",
+          replacePiece: replacePiece,
+          whichPieceGroup: i,
+          whichPiece: j,
+          newPiece: newPiece
+        });
+      }
+    });
+    if (!splitPiece) {
+      console.log("didn't split piece");
+    }
+  }
+
   return (
     <div className="improvStage">
       <Stage
@@ -172,6 +323,8 @@ export const ImprovSpace = () => {
         onMouseMove={handleMouseMove}
         onClick={handleClick}
         ref={stageEl}
+        onMouseDown={handleStageMouseDown}
+        onMouseUp={handleStageMouseUp}
       >
         <Layer ref={layerEl}>
           {Object.keys(state.pieceGroups).map((keyName, i) => {
@@ -195,7 +348,7 @@ export const ImprovSpace = () => {
                       fill={
                         state.pieceGroups[keyName].pieceData[pieceName].color
                       }
-                      opacity={0.9}
+                      opacity={state.pieceGroups[keyName].isReal ? 0.9 : 0.5}
                       visible={
                         state.pieceGroups[keyName].onDesignWall ? true : false
                       }
@@ -210,6 +363,38 @@ export const ImprovSpace = () => {
               </Group>
             );
           })}
+          {(startCut || finishedCut) && state.tool == "slicetool" && (
+            <>
+              <Circle
+                x={cutPoints.end.x}
+                y={cutPoints.end.y}
+                id={"endcut"}
+                radius={6}
+                fill={"red"}
+              />
+              <Circle
+                x={cutPoints.start.x}
+                y={cutPoints.start.y}
+                id={"startcut"}
+                radius={6}
+                fill={"green"}
+              />
+              <Line
+                x={0}
+                y={0}
+                class={"cutLine"}
+                id={"cutLine"}
+                points={[
+                  cutPoints.start.x,
+                  cutPoints.start.y,
+                  cutPoints.end.x,
+                  cutPoints.end.y
+                ]}
+                stroke={"purple"}
+                strokeWidth={4}
+              />
+            </>
+          )}
         </Layer>
       </Stage>
     </div>

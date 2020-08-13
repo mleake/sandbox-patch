@@ -36,7 +36,7 @@ export const SewToolBar = () => {
     } else if (tool === "slicetool") {
       setHelperText("click to drag a line over the shapes to place a cut");
     } else if (tool === "sewtool") {
-      setHelperText("click and drag selection rectangle to group elements");
+      setHelperText("group pieces");
     } else if (tool === "duplicatetool") {
       setHelperText("copies selected piece");
     } else if (tool === "colortool") {
@@ -245,7 +245,6 @@ export const SewToolBar = () => {
         </Typography>
       </Toolbar>
       <p className="helperText">{helperText}</p>
-      {localTool === "slicetool" ? <Button>cut</Button> : null}
       <p className="errorMessage">{state.errorMessage}</p>
       {Object.keys(state.pieceGroups).map((keyName, i) => (
         <>
