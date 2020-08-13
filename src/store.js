@@ -65,13 +65,10 @@ const reducer = (state, action) => {
       newState.message = action.message;
       return newState;
     case "duplicatePieces":
-      action.piecesToDuplicate.forEach((element, idx) => {
+      state.selectedShapes.forEach((pgId, idx) => {
         var newPieceGroupId = Object.keys(state.pieceGroups).length;
 
-        var newPieceGroup = Object.assign(
-          {},
-          state.pieceGroups[element.pieceGroup]
-        );
+        var newPieceGroup = Object.assign({}, state.pieceGroups[pgId]);
         state.pieceGroups[newPieceGroupId] = newPieceGroup;
         state.pieceGroups[newPieceGroupId].idx = newPieceGroupId;
         state.onDesignWall[newPieceGroupId] = true;

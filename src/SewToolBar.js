@@ -70,19 +70,9 @@ export const SewToolBar = () => {
   }
 
   function handleDuplicate() {
-    var piecesToDuplicate = [];
-    state.selectedShapes.map((shapeId, i) => {
-      var whichPieceGroup = shapeId.split("-")[1];
-      var whichPiece = shapeId.split("-")[2];
-      piecesToDuplicate.push({
-        pieceGroup: whichPieceGroup,
-        piece: whichPiece
-      });
-      dispatch({
-        type: "duplicatePieces",
-        message: "duplicatePieces",
-        piecesToDuplicate: piecesToDuplicate
-      });
+    dispatch({
+      type: "duplicatePieces",
+      message: "duplicatePieces"
     });
   }
 

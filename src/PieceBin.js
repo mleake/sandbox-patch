@@ -35,6 +35,7 @@ export const PieceBin = () => {
                 {Object.keys(state.pieceGroups[keyName].pieceData).map(
                   (pieceName, j) => (
                     <path
+                      id={"svg-" + keyName + "-" + pieceName}
                       key={"svg-" + keyName + "-" + pieceName}
                       d={state.pieceGroups[keyName].pieceData[pieceName].svg}
                       fill={

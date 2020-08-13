@@ -133,10 +133,9 @@ export const ImprovSpace = () => {
       var checkDist = checkSew();
       console.log(checkDist);
       if (checkDist) {
-        state.selectedShapes.map((shapeId, i) => {
-          var whichPieceGroup = shapeId.split("-")[1];
-          if (piecesToSew.indexOf(whichPieceGroup) < 0) {
-            piecesToSew.push(whichPieceGroup);
+        state.selectedShapes.map((pgId, i) => {
+          if (piecesToSew.indexOf(pgId) < 0) {
+            piecesToSew.push(pgId);
           }
         });
         dispatch({
@@ -180,6 +179,7 @@ export const ImprovSpace = () => {
               <Group
                 name={"improvGroup"}
                 id={keyName}
+                key={keyName}
                 draggable
                 onDrag={(e) => draggingGroup(e)}
               >
