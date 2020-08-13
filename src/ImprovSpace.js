@@ -39,8 +39,9 @@ export const ImprovSpace = () => {
       console.log("ss", state.selectedShapes);
       var idx = event.target.id();
       var index = state.selectedShapes.indexOf(idx);
+      var whichPieceGroup = idx.split("-")[1];
       if (index < 0) {
-        var newSelectedShapes = [...state.selectedShapes, idx];
+        var newSelectedShapes = [...state.selectedShapes, whichPieceGroup];
         dispatch({
           type: "selectShapes",
           message: "selectShapes",
@@ -56,8 +57,9 @@ export const ImprovSpace = () => {
     }
   }
   function removeShape(idx) {
+    var whichPieceGroup = idx.split("-")[1];
     var array = [...state.selectedShapes]; // make a separate copy of the array
-    var index = array.indexOf(idx);
+    var index = array.indexOf(whichPieceGroup);
     if (index !== -1) {
       array.splice(index, 1);
     }
@@ -177,58 +179,37 @@ export const ImprovSpace = () => {
             return (
               <Group
                 name={"improvGroup"}
-                id={"key-" + keyName}
-                key={"group-" + keyName}
+                id={keyName}
+                draggable
+                onDrag={(e) => draggingGroup(e)}
               >
                 {Object.keys(state.pieceGroups[keyName].pieceData).map(
                   (pieceName, j) => (
-                    <Rect
+                    <Path
+                      name={"improvShape"}
                       id={"piece-" + keyName + "-" + pieceName}
                       key={"piece-" + keyName + "-" + pieceName}
-                      className={"piece"}
-                      width={28}
-                      height={28}
-                      x={0}
-                      y={0}
+                      x={state.pieceGroups[keyName].pieceData[pieceName].x}
+                      y={state.pieceGroups[keyName].pieceData[pieceName].y}
+                      data={state.pieceGroups[keyName].pieceData[pieceName].svg}
                       fill={
                         state.pieceGroups[keyName].pieceData[pieceName].color
                       }
+                      opacity={0.9}
                       visible={
                         state.pieceGroups[keyName].onDesignWall ? true : false
                       }
                       stroke={
-                        state.selectedShapes.includes(
-                          "piece-" + keyName + "-" + pieceName
-                        )
+                        state.selectedShapes.includes(keyName)
                           ? "black"
                           : "white"
                       }
-                      draggable
                     />
                   )
                 )}
               </Group>
             );
           })}
-          {/* <Circle
-            key={"piece-" + 0 + "-" + 0}
-            id={"c1"}
-            x={50}
-            y={50}
-            fill={"red"}
-            width={40}
-            height={40}
-            stroke={state.selectedShapes.includes("c1") ? "black" : "white"}
-          />
-          <Circle
-            id={"c2"}
-            x={40}
-            y={40}
-            fill={"pink"}
-            width={30}
-            height={30}
-            stroke={state.selectedShapes.includes("c2") ? "black" : "white"}
-          /> */}
         </Layer>
       </Stage>
     </div>
