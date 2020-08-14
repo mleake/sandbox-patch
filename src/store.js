@@ -43,7 +43,8 @@ const reducer = (state, action) => {
     case "addCommand":
       state.commandHistory.push({
         command: action.command,
-        storedState: Object.assign({}, state)
+        storedState: Object.assign({}, state),
+        storedStage: action.stage
       });
       console.log("adding command", state);
       return state;

@@ -30,7 +30,7 @@ export const PieceBin = () => {
         </IconButton>
         <div className="scrolling-wrapper">
           {Object.keys(state.pieceGroups).map((keyName, i) => (
-            <>
+            <div key={"wrapper" + keyName}>
               <svg height="100" width="100" className="card">
                 {Object.keys(state.pieceGroups[keyName].pieceData).map(
                   (pieceName, j) => (
@@ -56,7 +56,7 @@ export const PieceBin = () => {
                 }
                 label="on design wall"
               />
-            </>
+            </div>
           ))}
         </div>
       </div>

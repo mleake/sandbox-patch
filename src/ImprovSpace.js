@@ -135,7 +135,8 @@ export const ImprovSpace = () => {
     dispatch({
       type: "addCommand",
       message: "addCommand",
-      command: "recolor"
+      command: "recolor",
+      stage: stageEl.current.toJSON()
     });
   }
 
@@ -204,7 +205,7 @@ export const ImprovSpace = () => {
           value={tool}
           onClick={(e) => handleClickButton(e)}
           onMouseEnter={(e) => handleHover(e)}
-          onMouseExit={(e) => fillHelperText("")}
+          onMouseOut={(e) => fillHelperText("")}
           selected={state.tool === tool}
           disabled={state.selectedShapes.length < 1}
         >
@@ -220,7 +221,7 @@ export const ImprovSpace = () => {
           value={tool}
           onClick={(e) => handleClickButton(e)}
           onMouseEnter={(e) => handleHover(e)}
-          onMouseExit={(e) => fillHelperText("")}
+          onMouseOut={(e) => fillHelperText("")}
           selected={state.tool === tool}
           disabled={state.selectedShapes.length < 2}
         >
@@ -236,7 +237,7 @@ export const ImprovSpace = () => {
           value={tool}
           onClick={(e) => handleClickButton(e)}
           onMouseEnter={(e) => handleHover(e)}
-          onMouseExit={(e) => fillHelperText("")}
+          onMouseOut={(e) => fillHelperText("")}
           selected={state.tool === tool}
         >
           {symbol}
@@ -568,15 +569,16 @@ export const ImprovSpace = () => {
         <p className="helperText">{helperText}</p>
         <p className="errorMessage">{state.errorMessage}</p>
         {Object.keys(state.pieceGroups).map((keyName, i) => (
-          <>
+          <div key={"colorpg-" + keyName}>
             {Object.keys(state.pieceGroups[keyName].pieceData).map(
               (pieceName, j) => (
-                <>
+                <div key={"colorpick-" + keyName + "-" + pieceName}>
                   {showColors.includes(keyName) && (
-                    <>
+                    <div id={"colorrect-" + keyName + "-" + pieceName}>
                       <Stage width={30} height={30}>
                         <Layer>
                           <Rect
+                            key={"cprect-" + keyName + "-" + pieceName}
                             width={28}
                             height={28}
                             x={0}
@@ -593,12 +595,12 @@ export const ImprovSpace = () => {
                         colors={getColorsFromFabrics(keyName, pieceName)}
                         onChange={(e) => selectNewColor(e, keyName, pieceName)}
                       />
-                    </>
+                    </div>
                   )}
-                </>
+                </div>
               )
             )}
-          </>
+          </div>
         ))}
       </div>
       <div className="improvStage">
