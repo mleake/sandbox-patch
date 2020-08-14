@@ -2,14 +2,14 @@
   font-family: sans-serif;
 }
 
-.scrolling-wrapper {
+/* .scrolling-wrapper {
   overflow-x: scroll;
   overflow-y: hidden;
   white-space: nowrap;
   width: 1000px;
   height: 200px;
   text-align: left;
-}
+} */
 
 .card {
   display: inline-block;

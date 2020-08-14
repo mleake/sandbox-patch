@@ -81,27 +81,73 @@ const reducer = (state, action) => {
       return state;
     case "sewPieces":
       var newPieceGroupId = Object.keys(state.pieceGroups).length;
-      state.pieceGroups[newPieceGroupId] = { pieceData: {} };
-      state.pieceGroups[newPieceGroupId].idx = newPieceGroupId;
-      state.onDesignWall[newPieceGroupId] = true;
-      state.pieceGroups[newPieceGroupId].onDesignWall = true;
-      state.pieceGroups[newPieceGroupId].isReal = false;
-      var pieceId = 0;
-      console.log("pts", action.piecesToSew);
-
-      action.piecesToSew.forEach((pgIdx, idx) => {
-        var currentPieceGroup = state.pieceGroups[pgIdx];
-
+      var newPieceId = 0;
+      var newPieceGroup = Object.assign(
+        {},
+        state.pieceGroups[action.piecesToSew[0]]
+      );
+      console.log("new piece group", newPieceGroup);
+      action.piecesToSew.forEach((pgId, idx) => {
+        var currentPieceGroup = state.pieceGroups[pgId];
+        console.log("current pg", pgId);
         Object.keys(currentPieceGroup.pieceData).forEach((pieceKey, pidx) => {
-          state.pieceGroups[newPieceGroupId].pieceData[pieceId] =
+          newPieceGroup.pieceData[newPieceId] =
             currentPieceGroup.pieceData[pieceKey];
-          state.pieceGroups[newPieceGroupId].pieceData[pieceId].idx = pieceId;
-          pieceId += 1;
+          console.log(newPieceGroup.pieceData[newPieceId]);
+          console.log(action.newPositions[pgId]);
         });
-        delete state.pieceGroups[pgIdx]; //delete whole piece group?
+        Object.keys(action.newPositions[pgId]).forEach((pieceKey, pidx) => {
+          newPieceGroup.pieceData[newPieceId].x =
+            action.newPositions[pgId][pidx].x;
+          newPieceGroup.pieceData[newPieceId].y =
+            action.newPositions[pgId][pidx].y;
+        });
+        state.pieceGroups[newPieceGroupId] = newPieceGroup;
+        state.pieceGroups[newPieceGroupId].idx = newPieceGroupId;
+        state.onDesignWall[newPieceGroupId] = true;
+        state.pieceGroups[newPieceGroupId].onDesignWall = true;
+        state.pieceGroups[newPieceGroupId].isReal = false;
+        newPieceId += 1;
+      });
+      action.piecesToSew.forEach((pgId, idx) => {
+        delete state.pieceGroups[pgId]; //delete whole piece group?
       });
       state.message = action.message;
+      state.selectedShapes = [];
+      console.log(state);
       return state;
+    // var newPieceGroupId = Object.keys(state.pieceGroups).length;
+    // state.pieceGroups[newPieceGroupId] = {};
+    // state.pieceGroups[newPieceGroupId].idx = newPieceGroupId;
+    // state.onDesignWall[newPieceGroupId] = true;
+    // state.pieceGroups[newPieceGroupId].onDesignWall = true;
+    // state.pieceGroups[newPieceGroupId].isReal = false;
+    // var pieceId = 0;
+
+    // action.piecesToSew.forEach((pgIdx, idx) => {
+    //   var currentPieceGroup = state.pieceGroups[pgIdx];
+    //   state.pieceGroups[newPieceGroupId].pieceData = {};
+    //   Object.keys(currentPieceGroup.pieceData).forEach((pieceKey, pidx) => {
+    //     var currentPieceData = Object.assign(
+    //       {},
+    //       currentPieceGroup.pieceData[pieceKey]
+    //     );
+    //     state.pieceGroups[newPieceGroupId].pieceData[
+    //       pieceId
+    //     ] = currentPieceData;
+    //     console.log(state.pieceGroups[newPieceGroupId].pieceData);
+    //     console.log(pieceKey, pieceId);
+    //     state.pieceGroups[newPieceGroupId].pieceData[pieceId].idx = pieceId;
+    //     state.pieceGroups[newPieceGroupId].pieceData[pieceId].x =
+    //       action.newPositions[pgIdx][pieceKey].x;
+    //     state.pieceGroups[newPieceGroupId].pieceData[pieceId].y =
+    //       action.newPositions[pgIdx][pieceKey].y;
+    //     pieceId += 1;
+    //   });
+    //   delete state.pieceGroups[pgIdx]; //delete whole piece group?
+    // });
+    // state.message = action.message;
+    // return state;
     case "loadJSON":
       console.log("loading json");
       var idx = 0;

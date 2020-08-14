@@ -43,6 +43,7 @@ export const ImprovSpace = () => {
   const [helperText, setHelperText] = useState("");
   const [showColorPalette, setShowColorPalette] = useState(false);
   const [showColors, setShowColors] = useState([]);
+  const [madeSeam, setMadeSeam] = useState(false);
   const classes = useStyles();
 
   function fillHelperText(tool) {
@@ -77,14 +78,18 @@ export const ImprovSpace = () => {
   }
 
   function handleClickButton(ev) {
+    ev.preventDefault;
+    setMadeSeam(false);
     var tool = ev.currentTarget.value;
     setLocalTool(tool);
 
     if (tool == "duplicatetool") {
       handleDuplicate();
-    }
-    if (tool == "colortool") {
+    } else if (tool == "colortool") {
       showColorChoices();
+    } else if (tool == "sewtool" && !madeSeam) {
+      handleSew();
+      setMadeSeam(true);
     }
     dispatch({
       type: "selectTool",
@@ -379,20 +384,31 @@ export const ImprovSpace = () => {
   }
 
   function handleSew() {
-    if (state.tool == "sewtool") {
-      var piecesToSew = [];
-      var checkDist = checkSew();
-      console.log(checkDist);
+    var piecesToSew = [];
+    var positions = {};
+    var checkDist = checkSew();
+    if (state.selectedShapes.length > 0) {
       if (checkDist) {
         state.selectedShapes.map((pgId, i) => {
+          positions[pgId] = {};
           if (piecesToSew.indexOf(pgId) < 0) {
             piecesToSew.push(pgId);
+            var shapeNode = stageEl.current.findOne("#" + pgId);
+            var pieces = shapeNode.getChildren();
+            console.log("pieces", pieces);
+            pieces.forEach((piece, i) => {
+              var rect = shapeNode.getClientRect();
+              positions[pgId][i] = { x: rect.x, y: rect.y };
+            });
+            console.log("positions", positions);
           }
         });
+
         dispatch({
           type: "sewPieces",
           message: "sewPieces",
-          piecesToSew: piecesToSew
+          piecesToSew: piecesToSew,
+          newPositions: positions
         });
         dispatch({
           type: "selectTool",
@@ -411,9 +427,7 @@ export const ImprovSpace = () => {
   }
 
   function handleMouseMove() {
-    if (state.tool == "sewtool") {
-      handleSew();
-    } else if (state.tool == "slicetool") {
+    if (state.tool == "slicetool") {
       moveCut();
     }
   }
