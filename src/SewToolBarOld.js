@@ -83,6 +83,12 @@ export const SewToolBar = () => {
       type: "duplicatePieces",
       message: "duplicatePieces"
     });
+    dispatch({
+      type: "addCommand",
+      message: "addCommand",
+      command: "duplicate",
+      stage: stageEl.current.toJSON()
+    });
   }
 
   function handleRecolor() {
@@ -110,6 +116,11 @@ export const SewToolBar = () => {
       whichPieceGroup: pgId,
       whichPiece: pieceId,
       color: color.hex
+    });
+    dispatch({
+      type: "addCommand",
+      message: "addCommand",
+      command: "recolor"
     });
   }
 

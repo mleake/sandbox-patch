@@ -1,5 +1,4 @@
 import React from "react";
-import { SewToolBar } from "./SewToolBar";
 import { PieceBin } from "./PieceBin";
 import { Loader } from "./Loader";
 import { StoreProvider } from "./store";
@@ -23,7 +22,6 @@ export default class App extends React.Component {
           <Container>
             <Row>
               <Loader data={JSONdata} />
-              <SewToolBar />
             </Row>
             <Row>
               <Col sm={8}>

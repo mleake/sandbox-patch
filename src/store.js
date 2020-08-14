@@ -45,6 +45,7 @@ const reducer = (state, action) => {
         command: action.command,
         storedState: Object.assign({}, state)
       });
+      console.log("adding command", state);
       return state;
     case "undoCommand":
       var popCommand = state.commandHistory.pop();
