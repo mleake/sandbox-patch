@@ -312,6 +312,25 @@ export const ImprovSpace = () => {
       });
     }
   }
+
+  function endDragShape(event) {
+    var positions = {};
+    var pgPositions = {};
+    var pgId = event.target.id();
+    console.log("pg Id", event.target);
+    positions[pgId] = {};
+    var shapeNode = stageEl.current.findOne("#" + pgId);
+    var pieces = shapeNode.getChildren();
+    pgPositions[pgId] = { x: shapeNode.x(), y: shapeNode.y() };
+    pieces.forEach((piece, i) => {
+      console.log("piece id", piece.id());
+      console.log("piece absolute pos", piece.absolutePosition());
+      console.log("piece relative pos", piece.position());
+      positions[pgId][i] = { x: piece.position().x, y: piece.position().y };
+    });
+    console.log("piece positions", positions);
+    console.log("pg positions", pgPositions);
+  }
   function removeShape(idx) {
     var whichPieceGroup = idx.split("-")[1];
     var array = [...state.selectedShapes]; // make a separate copy of the array
@@ -360,6 +379,19 @@ export const ImprovSpace = () => {
     return dist;
   }
 
+  function getOffset(p1, p2) {
+    var cr1 = p1.getClientRect();
+    var pos1 = p1.absolutePosition();
+    var c1x = pos1.x + cr1.width / 2;
+    var c1y = pos1.y + cr1.height / 2;
+
+    var cr2 = p2.getClientRect();
+    var pos2 = p2.absolutePosition();
+    var c2x = pos2.x + cr2.width / 2;
+    var c2y = pos2.y + cr2.height / 2;
+    return { x: c2x - c1x, y: c2y - c1y };
+  }
+
   function checkSew() {
     var shapeEls = [];
     var seamDistances = [];
@@ -385,30 +417,43 @@ export const ImprovSpace = () => {
 
   function handleSew() {
     var piecesToSew = [];
-    var positions = {};
     var checkDist = checkSew();
+
     if (state.selectedShapes.length > 0) {
       if (checkDist) {
+        var baseGroup; //add other pieces to this group
+        var bgId;
+        var pieceId = 0;
+        var changes = [];
         state.selectedShapes.map((pgId, i) => {
-          positions[pgId] = {};
-          if (piecesToSew.indexOf(pgId) < 0) {
-            piecesToSew.push(pgId);
+          if (i == 0) {
+            baseGroup = stageEl.current.findOne("#" + pgId);
+            bgId = pgId;
+            pieceId += baseGroup.getChildren().length;
+          } else {
             var shapeNode = stageEl.current.findOne("#" + pgId);
             var pieces = shapeNode.getChildren();
-            console.log("pieces", pieces);
+
             pieces.forEach((piece, i) => {
-              var rect = shapeNode.getClientRect();
-              positions[pgId][i] = { x: rect.x, y: rect.y };
+              changes.push({
+                oldPg: pgId,
+                newPg: bgId,
+                oldP: i,
+                newP: pieceId,
+                offset: getOffset(baseGroup, piece)
+              });
+              pieceId += 1;
+              // baseGroup.add(piece);
+              // shapeNode.remove(piece);
             });
-            console.log("positions", positions);
           }
         });
-
+        console.log("children", layerEl.current.getChildren());
+        console.log("changes", changes);
         dispatch({
           type: "sewPieces",
           message: "sewPieces",
-          piecesToSew: piecesToSew,
-          newPositions: positions
+          changes: changes
         });
         dispatch({
           type: "selectTool",
@@ -426,6 +471,77 @@ export const ImprovSpace = () => {
     }
   }
 
+  // function handleSew() {
+  //   var piecesToSew = [];
+  //   var positions = {};
+  //   var checkDist = checkSew();
+  //   var pgPositions = {};
+  //   if (state.selectedShapes.length > 0) {
+  //     if (checkDist) {
+  //       state.selectedShapes.map((pgId, i) => {
+  //         positions[pgId] = {};
+  //         if (piecesToSew.indexOf(pgId) < 0) {
+  //           piecesToSew.push(pgId);
+  //           var shapeNode = stageEl.current.findOne("#" + pgId);
+  //           pgPositions[pgId] = { x: shapeNode.x(), y: shapeNode.y() };
+  //           // var pieces = shapeNode.getChildren();
+  //           // console.log("pieces", pieces);
+  //           // pgPositions[pgId] = { x: shapeNode.x(), y: shapeNode.y() };
+  //           // pieces.forEach((piece, i) => {
+  //           //   positions[pgId][i] = { x: piece.x(), y: piece.y() };
+  //           // });
+  //           // console.log("positions", positions);
+  //         }
+  //       });
+
+  //       dispatch({
+  //         type: "sewPieces",
+  //         message: "sewPieces",
+  //         piecesToSew: piecesToSew,
+  //         pgPositions: pgPositions
+  //       });
+  //       dispatch({
+  //         type: "selectTool",
+  //         message: "selectTool",
+  //         tool: "selecttool"
+  //       });
+  //       console.log("state after sew", state);
+  //     } else {
+  //       dispatch({
+  //         type: "displayError",
+  //         message: "displayError",
+  //         errorMessage: "pieces too far to sew"
+  //       });
+  //     }
+  //   }
+  // }
+
+  function convertStageToPieceGroup() {
+    var groups = layerEl.current.getChildren();
+    var pieceGroups = {};
+    groups.forEach((group, pgid) => {
+      var newID = group.id();
+      pieceGroups[newID] = {};
+      pieces = group.getChildren();
+      console.log("pieces", pieces);
+      var usedIds = [];
+      pieceGroups[pgid] = state.pieceGroups[newID];
+      pieceGroups[pgid].pieceData = {};
+      pieces.forEach((piece, pid) => {
+        var idx = piece.id();
+        var oldPgId = idx.split("-")[1];
+        var oldPId = idx.split("-")[2];
+        pieceGroups[pgid].pieceData[pid] =
+          state.pieceGroups[oldPgId].pieceData[oldPId];
+        var absoluteTransform = piece.getAbsoluteTransform().decompose();
+        console.log("abs transform", absoluteTransform);
+        console.log(pieceGroups[pgid]);
+        pieceGroups[pgid].pieceData[pid].x = absoluteTransform.x;
+        pieceGroups[pgid].pieceData[pid].y = absoluteTransform.y;
+      });
+    });
+    return pieceGroups;
+  }
   function handleMouseMove() {
     if (state.tool == "slicetool") {
       moveCut();
@@ -638,6 +754,7 @@ export const ImprovSpace = () => {
                   key={keyName}
                   draggable
                   onDrag={(e) => draggingGroup(e)}
+                  onDragEnd={(e) => endDragShape(e)}
                 >
                   {Object.keys(state.pieceGroups[keyName].pieceData).map(
                     (pieceName, j) => (

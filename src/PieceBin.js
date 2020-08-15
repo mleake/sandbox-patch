@@ -21,6 +21,34 @@ export const PieceBin = () => {
     });
   };
 
+  function getPBPosition(pgId) {
+    var piecePositions = [];
+    for (
+      var i = 0;
+      i < Object.keys(state.pieceGroups[pgId].pieceData).length;
+      i++
+    ) {
+      var piece = state.pieceGroups[pgId].pieceData[i];
+      piecePositions.push([piece.x, piece.y]);
+    }
+    piecePositions.sort(function (a, b) {
+      return a[0] == b[0] ? a[1] - b[1] : a[0] - b[0];
+    });
+    var minX, minY;
+    minX, (minY = piecePositions[0]);
+    var updatedPositions = [];
+    for (
+      var i = 0;
+      i < Object.keys(state.pieceGroups[pgId].pieceData).length;
+      i++
+    ) {
+      var piece = state.pieceGroups[pgId].pieceData[i];
+      updatedPositions.push([piece.x - minX, piece.y - minY]);
+    }
+    console.log("piece bin locations", piecePositions, updatedPositions);
+    return updatedPositions;
+  }
+
   if (openPieceBin) {
     console.log(state.pieceGroups);
     return (
@@ -38,6 +66,8 @@ export const PieceBin = () => {
                       id={"svg-" + keyName + "-" + pieceName}
                       key={"svg-" + keyName + "-" + pieceName}
                       d={state.pieceGroups[keyName].pieceData[pieceName].svg}
+                      x={state.pieceGroups[keyName].pieceData[pieceName].x}
+                      y={state.pieceGroups[keyName].pieceData[pieceName].y}
                       fill={
                         state.pieceGroups[keyName].pieceData[pieceName].color
                       }
