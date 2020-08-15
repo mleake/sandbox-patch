@@ -42,12 +42,6 @@ export const Loader = (props) => {
       message: "addPieceGroup",
       newPieceGroups: newPieceGroups
     });
-    dispatch({
-      type: "addCommand",
-      message: "addCommand",
-      command: "addPieceGroup",
-      stage: {}
-    });
   }
 
   return (

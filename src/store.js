@@ -13,7 +13,7 @@ const initialState = {
   tool: "selecttool",
   selectedShapes: [],
   errorMessage: "",
-  commandHistory: [],
+  commandHistory: {},
   undoneCommands: []
 };
 
@@ -41,12 +41,23 @@ const reducer = (state, action) => {
       newState.message = action.message;
       return newState;
     case "addCommand":
-      state.commandHistory.push({
+      var commandId = Object.keys(state.commandHistory).length;
+      var newCommandHistory = Object.assign({}, state.commandHistory);
+      newCommandHistory[commandId] = {
         command: action.command,
-        storedState: Object.assign({}, state),
-        storedStage: action.stage
+        storedPieceGroups: JSON.parse(JSON.stringify(state.pieceGroups)),
+        affectedPieceGroups: [...state.selectedShapes]
+      };
+      state.commandHistory = newCommandHistory;
+      console.log("adding command", state.commandHistory);
+      return state;
+    case "commitStep":
+      var command = state.commandHistory[action.commandId];
+      var pieceGroups = command.affectedPieceGroups;
+      console.log(pieceGroups);
+      pieceGroups.forEach((pgId, i) => {
+        state.pieceGroups[pgId].isReal = true;
       });
-      console.log("adding command", state);
       return state;
     case "undoCommand":
       var popCommand = state.commandHistory.pop();
@@ -67,21 +78,27 @@ const reducer = (state, action) => {
       newState.message = action.message;
       return newState;
     case "duplicatePieces":
+      var newPgs = [];
       state.selectedShapes.forEach((pgId, idx) => {
         var newPieceGroupId = Object.keys(state.pieceGroups).length;
-
-        var newPieceGroup = Object.assign({}, state.pieceGroups[pgId]);
+        var newPieceGroup = JSON.parse(JSON.stringify(state.pieceGroups[pgId]));
         state.pieceGroups[newPieceGroupId] = newPieceGroup;
         state.pieceGroups[newPieceGroupId].idx = newPieceGroupId;
         state.onDesignWall[newPieceGroupId] = true;
         state.pieceGroups[newPieceGroupId].onDesignWall = true;
         state.pieceGroups[newPieceGroupId].isReal = false;
+        newPgs.push(newPieceGroupId);
       });
+      var newSelectedShapes = [...state.selectedShapes];
+      newPgs.forEach((pg) => {
+        newSelectedShapes.push(pg);
+      });
+      state.selectedShapes = newSelectedShapes;
       state.message = action.message;
+      console.log("IN DUPL", state.selectedShapes);
       return state;
     case "sewPieces":
-      console.log("in sew");
-      console.log(action.changes);
+      state.message = action.message;
       action.changes.forEach((change, idx) => {
         var pieceData = Object.assign(
           {},
@@ -90,109 +107,11 @@ const reducer = (state, action) => {
         pieceData.x = change.offset.x;
         pieceData.y = change.offset.y;
         state.pieceGroups[change.newPg].pieceData[change.newP] = pieceData;
-
+        state.pieceGroups[change.newPg].isReal = false;
         delete state.pieceGroups[change.oldPg];
       });
-      // action.piecesToSew.forEach((pgId, idx) => {
-      //   var currentPieceGroup = state.pieceGroups[pgId];
-      //   Object.keys(currentPieceGroup.pieceData).forEach((pieceKey, pidx) => {
-      //     newPieceGroup.pieceData[newPieceId] =
-      //       currentPieceGroup.pieceData[pieceKey];
-      //   });
-      //   // Object.keys(action.newPositions[pgId]).forEach((pieceKey, pidx) => {
-      //   //   newPieceGroup.pieceData[newPieceId].x =
-      //   //     action.newPositions[pgId][pidx].x;
-      //   //   newPieceGroup.pieceData[newPieceId].y =
-      //   //     action.newPositions[pgId][pidx].y;
-      //   // });
-      //   var newPgPos = action.pgPositions[pgId];
-      //   newPieceGroup.x = newPgPos.x;
-      //   newPieceGroup.y = newPgPos.y;
-      //   state.pieceGroups[newPieceGroupId] = newPieceGroup;
-      //   state.pieceGroups[newPieceGroupId].idx = newPieceGroupId;
-      //   state.onDesignWall[newPieceGroupId] = true;
-      //   state.pieceGroups[newPieceGroupId].onDesignWall = true;
-      //   state.pieceGroups[newPieceGroupId].isReal = false;
-      //   newPieceId += 1;
-      // });
-      // action.piecesToSew.forEach((pgId, idx) => {
-      //   delete state.pieceGroups[pgId]; //delete whole piece group?
-      // });
-      // state.message = action.message;
-      // state.selectedShapes = [];
-      // console.log("state in sew", state);
       return state;
 
-    // case "sewPieces":
-    //   var newPieceGroupId = Object.keys(state.pieceGroups).length;
-    //   var newPieceId = 0;
-    //   var newPieceGroup = Object.assign(
-    //     {},
-    //     state.pieceGroups[action.piecesToSew[0]]
-    //   );
-    //   console.log("new piece group", newPieceGroup);
-    //   action.piecesToSew.forEach((pgId, idx) => {
-    //     var currentPieceGroup = state.pieceGroups[pgId];
-    //     console.log("current pg", pgId);
-    //     Object.keys(currentPieceGroup.pieceData).forEach((pieceKey, pidx) => {
-    //       newPieceGroup.pieceData[newPieceId] =
-    //         currentPieceGroup.pieceData[pieceKey];
-    //     });
-    //     // Object.keys(action.newPositions[pgId]).forEach((pieceKey, pidx) => {
-    //     //   newPieceGroup.pieceData[newPieceId].x =
-    //     //     action.newPositions[pgId][pidx].x;
-    //     //   newPieceGroup.pieceData[newPieceId].y =
-    //     //     action.newPositions[pgId][pidx].y;
-    //     // });
-    //     var newPgPos = action.pgPositions[pgId];
-    //     newPieceGroup.x = newPgPos.x;
-    //     newPieceGroup.y = newPgPos.y;
-    //     state.pieceGroups[newPieceGroupId] = newPieceGroup;
-    //     state.pieceGroups[newPieceGroupId].idx = newPieceGroupId;
-    //     state.onDesignWall[newPieceGroupId] = true;
-    //     state.pieceGroups[newPieceGroupId].onDesignWall = true;
-    //     state.pieceGroups[newPieceGroupId].isReal = false;
-    //     newPieceId += 1;
-    //   });
-    //   action.piecesToSew.forEach((pgId, idx) => {
-    //     delete state.pieceGroups[pgId]; //delete whole piece group?
-    //   });
-    //   state.message = action.message;
-    //   state.selectedShapes = [];
-    //   console.log("state in sew", state);
-    //   return state;
-    // var newPieceGroupId = Object.keys(state.pieceGroups).length;
-    // state.pieceGroups[newPieceGroupId] = {};
-    // state.pieceGroups[newPieceGroupId].idx = newPieceGroupId;
-    // state.onDesignWall[newPieceGroupId] = true;
-    // state.pieceGroups[newPieceGroupId].onDesignWall = true;
-    // state.pieceGroups[newPieceGroupId].isReal = false;
-    // var pieceId = 0;
-
-    // action.piecesToSew.forEach((pgIdx, idx) => {
-    //   var currentPieceGroup = state.pieceGroups[pgIdx];
-    //   state.pieceGroups[newPieceGroupId].pieceData = {};
-    //   Object.keys(currentPieceGroup.pieceData).forEach((pieceKey, pidx) => {
-    //     var currentPieceData = Object.assign(
-    //       {},
-    //       currentPieceGroup.pieceData[pieceKey]
-    //     );
-    //     state.pieceGroups[newPieceGroupId].pieceData[
-    //       pieceId
-    //     ] = currentPieceData;
-    //     console.log(state.pieceGroups[newPieceGroupId].pieceData);
-    //     console.log(pieceKey, pieceId);
-    //     state.pieceGroups[newPieceGroupId].pieceData[pieceId].idx = pieceId;
-    //     state.pieceGroups[newPieceGroupId].pieceData[pieceId].x =
-    //       action.newPositions[pgIdx][pieceKey].x;
-    //     state.pieceGroups[newPieceGroupId].pieceData[pieceId].y =
-    //       action.newPositions[pgIdx][pieceKey].y;
-    //     pieceId += 1;
-    //   });
-    //   delete state.pieceGroups[pgIdx]; //delete whole piece group?
-    // });
-    // state.message = action.message;
-    // return state;
     case "loadJSON":
       console.log("loading json");
       var idx = 0;
@@ -351,6 +270,7 @@ const reducer = (state, action) => {
     //   return returnVal;
     case "recolorPieceGroup":
       var newState = Object.assign({}, state);
+      newState.message = action.message;
       newState.pieceGroups[action.whichPieceGroup].pieceData[
         action.whichPiece
       ].color = action.color;
@@ -359,6 +279,7 @@ const reducer = (state, action) => {
     case "cutPiece":
       console.log(action.replacePiece, action.newPiece);
       var newState = Object.assign({}, state);
+      newState.message = action.message;
       //add newPiece
       var newPieceGroupId = Object.keys(state.pieceGroups).length;
       newState.pieceGroups[newPieceGroupId] = {};

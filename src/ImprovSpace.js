@@ -106,8 +106,7 @@ export const ImprovSpace = () => {
     dispatch({
       type: "addCommand",
       message: "addCommand",
-      command: "duplicate",
-      stage: stageEl.current.toJSON()
+      command: "duplicate"
     });
   }
 
@@ -295,7 +294,7 @@ export const ImprovSpace = () => {
       console.log("ss", state.selectedShapes);
       var idx = event.target.id();
       var index = state.selectedShapes.indexOf(idx);
-      var whichPieceGroup = idx.split("-")[1];
+      var whichPieceGroup = idx.split("-")[1].toString();
       if (index < 0) {
         var newSelectedShapes = [...state.selectedShapes, whichPieceGroup];
         dispatch({
@@ -461,6 +460,12 @@ export const ImprovSpace = () => {
           tool: "selecttool"
         });
         console.log("state after sew", state);
+        dispatch({
+          type: "addCommand",
+          message: "addCommand",
+          command: "sew",
+          stage: stageEl.current.toJSON()
+        });
       } else {
         dispatch({
           type: "displayError",
@@ -662,6 +667,12 @@ export const ImprovSpace = () => {
           whichPieceGroup: i,
           whichPiece: j,
           newPiece: newPiece
+        });
+        dispatch({
+          type: "addCommand",
+          message: "addCommand",
+          command: "cut",
+          stage: stageEl.current.toJSON()
         });
       }
     });

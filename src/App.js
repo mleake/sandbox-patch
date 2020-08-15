@@ -4,6 +4,7 @@ import { Loader } from "./Loader";
 import { StoreProvider } from "./store";
 import { ImprovSpace } from "./ImprovSpace";
 import { Layout } from "./Layout";
+import { History } from "./History";
 import * as JSONdata from "./data.json";
 import { Container, Row, Col } from "react-bootstrap";
 
@@ -27,7 +28,10 @@ export default class App extends React.Component {
               <Col sm={8}>
                 <ImprovSpace />
               </Col>
-              <Col sm={4}>
+              <Col sm={2}>
+                <History />
+              </Col>
+              <Col sm={2}>
                 <Layout />
               </Col>
             </Row>
