@@ -14,7 +14,8 @@ const initialState = {
   selectedShapes: [],
   errorMessage: "",
   commandHistory: {},
-  undoneCommands: []
+  undoneCommands: [],
+  fullHistory: {}
 };
 
 const reducer = (state, action) => {
@@ -31,8 +32,9 @@ const reducer = (state, action) => {
         tool: "selecttool",
         selectedShapes: [],
         errorMessage: "",
-        commandHistory: [],
-        undoneCommands: []
+        commandHistory: {},
+        undoneCommands: [],
+        fullHistory: {}
       };
 
     case "selectTool":
@@ -42,13 +44,21 @@ const reducer = (state, action) => {
       return newState;
     case "addCommand":
       var commandId = Object.keys(state.commandHistory).length;
+      var fhId = Object.keys(state.fullHistory).length;
       var newCommandHistory = Object.assign({}, state.commandHistory);
+      var newFullHistory = Object.assign({}, state.fullHistory);
       newCommandHistory[commandId] = {
         command: action.command,
         storedPieceGroups: JSON.parse(JSON.stringify(state.pieceGroups)),
         affectedPieceGroups: [...state.selectedShapes]
       };
+      newFullHistory[fhId] = {
+        command: action.command,
+        storedPieceGroups: JSON.parse(JSON.stringify(state.pieceGroups)),
+        affectedPieceGroups: [...state.selectedShapes]
+      };
       state.commandHistory = newCommandHistory;
+      state.fullHistory = newFullHistory;
       console.log("adding command", state.commandHistory);
       return state;
     case "commitStep":
@@ -58,7 +68,17 @@ const reducer = (state, action) => {
       pieceGroups.forEach((pgId, i) => {
         state.pieceGroups[pgId].isReal = true;
       });
-      return state;
+      var newCommandHistory = {};
+      for (var i = 0; i < Object.keys(state.commandHistory).length; i++) {
+        var cid = Object.keys(state.commandHistory)[i];
+        if (cid != action.commandId) {
+          newCommandHistory[cid] = state.commandHistory[cid];
+        }
+      }
+      state.commandHistory = newCommandHistory;
+      console.log("in commit", newCommandHistory, state);
+      var newState = JSON.parse(JSON.stringify(state));
+      return newState;
     case "undoCommand":
       var popCommand = state.commandHistory.pop();
       state.undoneCommands.push(popCommand);
@@ -80,7 +100,7 @@ const reducer = (state, action) => {
     case "duplicatePieces":
       var newPgs = [];
       state.selectedShapes.forEach((pgId, idx) => {
-        var newPieceGroupId = Object.keys(state.pieceGroups).length;
+        var newPieceGroupId = Object.keys(state.pieceGroups).length.toString();
         var newPieceGroup = JSON.parse(JSON.stringify(state.pieceGroups[pgId]));
         state.pieceGroups[newPieceGroupId] = newPieceGroup;
         state.pieceGroups[newPieceGroupId].idx = newPieceGroupId;
