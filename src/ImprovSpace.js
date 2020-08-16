@@ -698,7 +698,7 @@ export const ImprovSpace = () => {
   }
 
   return (
-    <Container>
+    <>
       <Row>
         <Toolbar position="static">
           <Typography
@@ -764,106 +764,113 @@ export const ImprovSpace = () => {
           </div>
         ))}
       </Row>
-      <Row>
-        <Col xs={8}>
-          <Stage
-            key="improvStage"
-            name="improvStage"
-            width={window.innerWidth / 2}
-            height={window.innerHeight / 2}
-            onDblClick={handleDoubleClick}
-            onMouseMove={handleMouseMove}
-            onClick={handleClick}
-            ref={stageEl}
-            onMouseDown={handleStageMouseDown}
-            onMouseUp={handleStageMouseUp}
-          >
-            <Layer ref={layerEl}>
-              {Object.keys(state.pieceGroups).map((keyName, i) => {
-                return (
-                  <Group
-                    name={"improvGroup"}
-                    id={keyName}
-                    key={keyName}
-                    draggable
-                    onDrag={(e) => draggingGroup(e)}
-                    onDragEnd={(e) => endDragShape(e)}
-                    x={state.pieceGroups[keyName].x}
-                    y={state.pieceGroups[keyName].y}
-                  >
-                    {Object.keys(state.pieceGroups[keyName].pieceData).map(
-                      (pieceName, j) => (
-                        <Path
-                          name={"improvShape"}
-                          id={"piece-" + keyName + "-" + pieceName}
-                          key={"piece-" + keyName + "-" + pieceName}
-                          data={
-                            state.pieceGroups[keyName].pieceData[pieceName].svg
-                          }
-                          fill={
-                            state.pieceGroups[keyName].pieceData[pieceName]
-                              .color
-                          }
-                          opacity={
-                            state.pieceGroups[keyName].isReal ? 0.9 : 0.5
-                          }
-                          visible={
-                            state.pieceGroups[keyName].onDesignWall
-                              ? true
-                              : false
-                          }
-                          stroke={
-                            state.selectedShapes.includes(keyName)
-                              ? "black"
-                              : "white"
-                          }
-                          x={state.pieceGroups[keyName].pieceData[pieceName].x}
-                          y={state.pieceGroups[keyName].pieceData[pieceName].y}
-                        />
-                      )
-                    )}
-                  </Group>
-                );
-              })}
-              {(startCut || finishedCut) && state.tool == "slicetool" && (
-                <>
-                  <Circle
-                    x={cutPoints.end.x}
-                    y={cutPoints.end.y}
-                    id={"endcut"}
-                    radius={6}
-                    fill={"red"}
-                  />
-                  <Circle
-                    x={cutPoints.start.x}
-                    y={cutPoints.start.y}
-                    id={"startcut"}
-                    radius={6}
-                    fill={"green"}
-                  />
-                  <Line
-                    x={0}
-                    y={0}
-                    class={"cutLine"}
-                    id={"cutLine"}
-                    points={[
-                      cutPoints.start.x,
-                      cutPoints.start.y,
-                      cutPoints.end.x,
-                      cutPoints.end.y
-                    ]}
-                    stroke={"purple"}
-                    strokeWidth={4}
-                  />
-                </>
-              )}
-            </Layer>
-          </Stage>
-        </Col>
-        <Col xs={4}>
+      <div id="row1">
+        <div id="column1">
+          <div className="stageParent">
+            <Stage
+              key="improvStage"
+              name="improvStage"
+              width={800}
+              height={600}
+              onDblClick={handleDoubleClick}
+              onMouseMove={handleMouseMove}
+              onClick={handleClick}
+              ref={stageEl}
+              onMouseDown={handleStageMouseDown}
+              onMouseUp={handleStageMouseUp}
+            >
+              <Layer ref={layerEl}>
+                {Object.keys(state.pieceGroups).map((keyName, i) => {
+                  return (
+                    <Group
+                      name={"improvGroup"}
+                      id={keyName}
+                      key={keyName}
+                      draggable
+                      onDrag={(e) => draggingGroup(e)}
+                      onDragEnd={(e) => endDragShape(e)}
+                      x={state.pieceGroups[keyName].x}
+                      y={state.pieceGroups[keyName].y}
+                    >
+                      {Object.keys(state.pieceGroups[keyName].pieceData).map(
+                        (pieceName, j) => (
+                          <Path
+                            name={"improvShape"}
+                            id={"piece-" + keyName + "-" + pieceName}
+                            key={"piece-" + keyName + "-" + pieceName}
+                            data={
+                              state.pieceGroups[keyName].pieceData[pieceName]
+                                .svg
+                            }
+                            fill={
+                              state.pieceGroups[keyName].pieceData[pieceName]
+                                .color
+                            }
+                            opacity={
+                              state.pieceGroups[keyName].isReal ? 0.9 : 0.5
+                            }
+                            visible={
+                              state.pieceGroups[keyName].onDesignWall
+                                ? true
+                                : false
+                            }
+                            stroke={
+                              state.selectedShapes.includes(keyName)
+                                ? "black"
+                                : "white"
+                            }
+                            x={
+                              state.pieceGroups[keyName].pieceData[pieceName].x
+                            }
+                            y={
+                              state.pieceGroups[keyName].pieceData[pieceName].y
+                            }
+                          />
+                        )
+                      )}
+                    </Group>
+                  );
+                })}
+                {(startCut || finishedCut) && state.tool == "slicetool" && (
+                  <>
+                    <Circle
+                      x={cutPoints.end.x}
+                      y={cutPoints.end.y}
+                      id={"endcut"}
+                      radius={6}
+                      fill={"red"}
+                    />
+                    <Circle
+                      x={cutPoints.start.x}
+                      y={cutPoints.start.y}
+                      id={"startcut"}
+                      radius={6}
+                      fill={"green"}
+                    />
+                    <Line
+                      x={0}
+                      y={0}
+                      class={"cutLine"}
+                      id={"cutLine"}
+                      points={[
+                        cutPoints.start.x,
+                        cutPoints.start.y,
+                        cutPoints.end.x,
+                        cutPoints.end.y
+                      ]}
+                      stroke={"purple"}
+                      strokeWidth={4}
+                    />
+                  </>
+                )}
+              </Layer>
+            </Stage>
+          </div>
+        </div>
+        <div id="column2">
           <History />
-        </Col>
-      </Row>
-    </Container>
+        </div>
+      </div>
+    </>
   );
 };

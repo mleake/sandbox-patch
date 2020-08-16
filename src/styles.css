@@ -2,6 +2,12 @@
   font-family: sans-serif;
 }
 
+.stageParent {
+  border: 1px solid black;
+  width: 800px;
+  height: 600px;
+}
+
 /* .scrolling-wrapper {
   overflow-x: scroll;
   overflow-y: hidden;
@@ -19,16 +25,30 @@
   color: red;
 }
 
+#row1 {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+}
+
+#column1 {
+  display: flex;
+  flex-direction: column;
+  float: left;
+}
+
+#column2 {
+  display: flex;
+  flex-direction: column;
+}
+
 /* .improvStage {
   width: 1000px;
   height: 800px;
   display: inline-block;
 }
 
-#stageParent {
-  border: 1px solid black;
-  width: 50%;
-}
+
 
 .HistoryBar {
   width: 20%;
