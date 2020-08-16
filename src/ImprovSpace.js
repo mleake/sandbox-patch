@@ -82,7 +82,7 @@ export const ImprovSpace = () => {
 
   function handleClickButton(ev) {
     ev.preventDefault;
-    setMadeSeam(false);
+    // setMadeSeam(false);
     var tool = ev.currentTarget.value;
     setLocalTool(tool);
 
@@ -90,9 +90,9 @@ export const ImprovSpace = () => {
       handleDuplicate();
     } else if (tool == "colortool") {
       showColorChoices();
-    } else if (tool == "sewtool" && !madeSeam) {
+    } else if (tool == "sewtool") {
       handleSew();
-      setMadeSeam(true);
+      // setMadeSeam(true);
     } else if (tool == "deletetool") {
       handleDelete();
     } else if (tool == "savetool") {
@@ -715,8 +715,6 @@ export const ImprovSpace = () => {
             {createButton("sewtool")}
             {createButton("duplicatetool")}
             {createButton("colortool")}
-            {createButton("resizetool")}
-            {createButton("croptool")}
           </Typography>
           <Typography
             style={{

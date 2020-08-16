@@ -15,7 +15,8 @@ const initialState = {
   errorMessage: "",
   commandHistory: {},
   undoneCommands: [],
-  fullHistory: {}
+  fullHistory: {},
+  history: []
 };
 
 const reducer = (state, action) => {
@@ -34,7 +35,8 @@ const reducer = (state, action) => {
         errorMessage: "",
         commandHistory: {},
         undoneCommands: [],
-        fullHistory: {}
+        fullHistory: {},
+        pieceHistory: {}
       };
     case "loadSavedState":
       return action.savedState;
@@ -48,6 +50,7 @@ const reducer = (state, action) => {
       var fhId = Object.keys(state.fullHistory).length;
       var newCommandHistory = Object.assign({}, state.commandHistory);
       var newFullHistory = Object.assign({}, state.fullHistory);
+
       if (action.display) {
         newCommandHistory[commandId] = {
           command: action.command,
@@ -63,6 +66,7 @@ const reducer = (state, action) => {
       state.commandHistory = newCommandHistory;
       state.fullHistory = newFullHistory;
       console.log("adding command", state.commandHistory);
+      state.selectedShapes = [];
       return state;
     case "commitStep":
       var command = state.commandHistory[action.commandId];
@@ -110,6 +114,11 @@ const reducer = (state, action) => {
         state.pieceGroups[newPieceGroupId].onDesignWall = true;
         state.pieceGroups[newPieceGroupId].isReal = false;
         newPgs.push(newPieceGroupId);
+        state.history.push({
+          action: "duplicate",
+          parents: [pgId],
+          children: [pgId, newPieceGroupId]
+        });
       });
       var newSelectedShapes = [...state.selectedShapes];
       newPgs.forEach((pg) => {
@@ -118,15 +127,24 @@ const reducer = (state, action) => {
       state.selectedShapes = newSelectedShapes;
       state.message = action.message;
       console.log("IN DUPL", state.selectedShapes);
+      console.log(state.history);
       return state;
     case "sewPieces":
       state.message = action.message;
       var newState = JSON.parse(JSON.stringify(state));
       var oldPg = [];
+      var history = {
+        action: "sew",
+        parents: [],
+        children: []
+      };
       action.changes.forEach((change, idx) => {
         var pieceData = JSON.parse(
           JSON.stringify(state.pieceGroups[change.oldPg].pieceData[change.oldP])
         );
+        history.parents.push(change.oldPg);
+        history.parents.push(change.newPg);
+        history.children.push(change.newPg);
 
         newState.pieceGroups[change.newPg].pieceData[change.newP] = pieceData;
         newState.pieceGroups[change.newPg].pieceData[change.newP].x =
@@ -138,6 +156,7 @@ const reducer = (state, action) => {
           oldPg.push(change.oldPg);
         }
       });
+      newState.history.push(history);
       oldPg.forEach((pgId) => {
         delete newState.pieceGroups[pgId];
       });
@@ -326,6 +345,8 @@ const reducer = (state, action) => {
       var newPieceGroupId = Object.keys(state.pieceGroups).length;
       newState.pieceGroups[newPieceGroupId] = {};
       newState.pieceGroups[newPieceGroupId].idx = newPieceGroupId;
+      newState.pieceGroups[newPieceGroupId].x =
+        newState.pieceGroups[action.whichPieceGroup].x + 5;
       newState.pieceGroups[newPieceGroupId].pieceData = {};
       newState.pieceGroups[newPieceGroupId].pieceData[0] = action.newPiece;
       newState.pieceGroups[newPieceGroupId].onDesignWall = true;
@@ -341,6 +362,12 @@ const reducer = (state, action) => {
       ] = action.replacePiece;
       newState.pieceGroups[action.whichPieceGroup].isReal = false;
       newState.onDesignWall[action.whichPieceGroup] = true;
+      newState.history.push({
+        action: "cut",
+        parents: [action.whichPieceGroup],
+        children: [action.whichPieceGroup, newPieceGroupId]
+      });
+      console.log("in cut state is ", newState);
       return newState;
     case "finishEdit":
       // for (var i=0; i<Object.keys(state.pieces).length; i++) {
