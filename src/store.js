@@ -36,7 +36,8 @@ const reducer = (state, action) => {
         undoneCommands: [],
         fullHistory: {}
       };
-
+    case "loadSavedState":
+      return action.savedState;
     case "selectTool":
       var newState = Object.assign({}, state);
       newState.tool = action.tool;
@@ -47,11 +48,13 @@ const reducer = (state, action) => {
       var fhId = Object.keys(state.fullHistory).length;
       var newCommandHistory = Object.assign({}, state.commandHistory);
       var newFullHistory = Object.assign({}, state.fullHistory);
-      newCommandHistory[commandId] = {
-        command: action.command,
-        storedPieceGroups: JSON.parse(JSON.stringify(state.pieceGroups)),
-        affectedPieceGroups: [...state.selectedShapes]
-      };
+      if (action.display) {
+        newCommandHistory[commandId] = {
+          command: action.command,
+          storedPieceGroups: JSON.parse(JSON.stringify(state.pieceGroups)),
+          affectedPieceGroups: [...state.selectedShapes]
+        };
+      }
       newFullHistory[fhId] = {
         command: action.command,
         storedPieceGroups: JSON.parse(JSON.stringify(state.pieceGroups)),
@@ -59,7 +62,6 @@ const reducer = (state, action) => {
       };
       state.commandHistory = newCommandHistory;
       state.fullHistory = newFullHistory;
-      state.selectedShapes = [];
       console.log("adding command", state.commandHistory);
       return state;
     case "commitStep":
@@ -81,7 +83,15 @@ const reducer = (state, action) => {
       var newState = JSON.parse(JSON.stringify(state));
       return newState;
     case "displayError":
+      state.message = action.message;
       state.errorMessage = action.errorMessage;
+      return state;
+    case "deletePieceGroups":
+      state.message = action.message;
+      action.whichPieceGroups.forEach((pgId, i) => {
+        state.selectedShapes = state.selectedShapes.filter((e) => e !== pgId);
+        delete state.pieceGroups[pgId];
+      });
       return state;
     case "selectShapes":
       var newState = Object.assign({}, state);
@@ -93,6 +103,7 @@ const reducer = (state, action) => {
       state.selectedShapes.forEach((pgId, idx) => {
         var newPieceGroupId = Object.keys(state.pieceGroups).length.toString();
         var newPieceGroup = JSON.parse(JSON.stringify(state.pieceGroups[pgId]));
+        newPieceGroup.x = newPieceGroup.x + action.offsets[pgId];
         state.pieceGroups[newPieceGroupId] = newPieceGroup;
         state.pieceGroups[newPieceGroupId].idx = newPieceGroupId;
         state.onDesignWall[newPieceGroupId] = true;

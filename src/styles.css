@@ -19,11 +19,29 @@
   color: red;
 }
 
-.improvStage {
-  border: 1px solid black;
-  width: 100%;
-  height: 100%;
+/* .improvStage {
+  width: 1000px;
+  height: 800px;
   display: inline-block;
+}
+
+#stageParent {
+  border: 1px solid black;
+  width: 50%;
+}
+
+.HistoryBar {
+  width: 20%;
+  float: left;
+  padding: 10px;
+  border: 2px solid red;
+}
+
+.mainSpace {
+  width: 80%;
+  float: left;
+  padding: 10px;
+  border: 2px solid blue;
 }
 
 .layoutDiv {
@@ -31,17 +49,17 @@
   width: 100px;
   height: 800px;
   display: inline-block;
-}
+} */
 
 .hiddenDiv {
   display: none;
 }
 
-.col-sm-8 {
+.col-xs-8 {
   display: inline-block;
   margin: 0;
 }
-.col-sm-4 {
+.col-xs-4 {
   display: inline-block;
   margin: 0;
 }

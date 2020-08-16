@@ -48,6 +48,8 @@ export const History = () => {
                         name={"storedImprovGroup"}
                         id={"stored-" + keyName + "-" + i}
                         key={"stored-" + keyName + "-" + i}
+                        x={storedPieceGroups[keyName].x}
+                        y={storedPieceGroups[keyName].y}
                       >
                         {Object.keys(storedPieceGroups[keyName].pieceData).map(
                           (pieceName, j) => (
