@@ -38,7 +38,7 @@ export const History = () => {
             state.commandHistory[command].command
           );
           return (
-            <>
+            <div key={"frag-" + i}>
               <h2> {state.commandHistory[command].command} </h2>
               <Stage key={"historyStage-" + i} width={200} height={200}>
                 <Layer>
@@ -97,7 +97,7 @@ export const History = () => {
                 }
                 label="done"
               />
-            </>
+            </div>
           );
         })}
       </>

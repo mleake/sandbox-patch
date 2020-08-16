@@ -71,7 +71,7 @@ export const PieceBin = () => {
                       fill={
                         state.pieceGroups[keyName].pieceData[pieceName].color
                       }
-                      stroke="red"
+                      opacity={state.pieceGroups[keyName].isReal ? 0.9 : 0.5}
                     />
                   )
                 )}

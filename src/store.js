@@ -59,6 +59,7 @@ const reducer = (state, action) => {
       };
       state.commandHistory = newCommandHistory;
       state.fullHistory = newFullHistory;
+      state.selectedShapes = [];
       console.log("adding command", state.commandHistory);
       return state;
     case "commitStep":
@@ -79,16 +80,6 @@ const reducer = (state, action) => {
       console.log("in commit", newCommandHistory, state);
       var newState = JSON.parse(JSON.stringify(state));
       return newState;
-    case "undoCommand":
-      var popCommand = state.commandHistory.pop();
-      state.undoneCommands.push(popCommand);
-      return state;
-    case "redoCommand":
-      if (state.undoneCommands.length > 0) {
-        var popCommand = state.undoneCommands.pop();
-        state.commandHistory.push(popCommand);
-      }
-      return state;
     case "displayError":
       state.errorMessage = action.errorMessage;
       return state;
@@ -119,19 +110,28 @@ const reducer = (state, action) => {
       return state;
     case "sewPieces":
       state.message = action.message;
+      var newState = JSON.parse(JSON.stringify(state));
+      var oldPg = [];
       action.changes.forEach((change, idx) => {
-        var pieceData = Object.assign(
-          {},
-          state.pieceGroups[change.oldPg].pieceData[change.oldP]
+        var pieceData = JSON.parse(
+          JSON.stringify(state.pieceGroups[change.oldPg].pieceData[change.oldP])
         );
-        pieceData.x = change.offset.x;
-        pieceData.y = change.offset.y;
-        state.pieceGroups[change.newPg].pieceData[change.newP] = pieceData;
-        state.pieceGroups[change.newPg].isReal = false;
-        delete state.pieceGroups[change.oldPg];
-      });
-      return state;
 
+        newState.pieceGroups[change.newPg].pieceData[change.newP] = pieceData;
+        newState.pieceGroups[change.newPg].pieceData[change.newP].x =
+          change.newPos.x;
+        newState.pieceGroups[change.newPg].pieceData[change.newP].y =
+          change.newPos.y;
+        newState.pieceGroups[change.newPg].isReal = false;
+        if (oldPg.indexOf(change.oldPg) < 0) {
+          oldPg.push(change.oldPg);
+        }
+      });
+      oldPg.forEach((pgId) => {
+        delete newState.pieceGroups[pgId];
+      });
+      console.log("in sew pieces STATE", newState);
+      return newState;
     case "loadJSON":
       console.log("loading json");
       var idx = 0;
@@ -192,7 +192,18 @@ const reducer = (state, action) => {
       newState.onDesignWall[keyName] = !state.pieceGroups[keyName].onDesignWall;
       newState.message = action.message;
       return newState;
-
+    case "updatePositions":
+      var newState = JSON.parse(JSON.stringify(state));
+      console.log(action.changes);
+      // action.changes.forEach((change) => {
+      //   newState.pieceGroups[change.pgId].pieceData[change.pid].x =
+      //     change.pos.x;
+      //   newState.pieceGroups[change.pgId].pieceData[change.pid].x =
+      //     change.pos.y;
+      // });
+      newState.pieceGroups[action.whichPieceGroup].x = action.pos.x;
+      newState.pieceGroups[action.whichPieceGroup].y = action.pos.y;
+      return newState;
     // case "movePieceGroup":
     //   state.pieceGroups[action.whichPieceGroup].pieceData[
     //     action.whichPiece
@@ -319,10 +330,6 @@ const reducer = (state, action) => {
       ] = action.replacePiece;
       newState.pieceGroups[action.whichPieceGroup].isReal = false;
       newState.onDesignWall[action.whichPieceGroup] = true;
-      var selectedShapes = state.selectedShapes.filter(
-        (item) => item !== action.whichPieceGroup
-      );
-      newState.selectedShapes = selectedShapes;
       return newState;
     case "finishEdit":
       // for (var i=0; i<Object.keys(state.pieces).length; i++) {

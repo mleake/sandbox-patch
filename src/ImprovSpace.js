@@ -294,7 +294,7 @@ export const ImprovSpace = () => {
       console.log("ss", state.selectedShapes);
       var idx = event.target.id();
       var index = state.selectedShapes.indexOf(idx);
-      var whichPieceGroup = idx.split("-")[1].toString();
+      var whichPieceGroup = idx.split("-")[1];
       if (index < 0) {
         var newSelectedShapes = [...state.selectedShapes, whichPieceGroup];
         dispatch({
@@ -316,19 +316,26 @@ export const ImprovSpace = () => {
     var positions = {};
     var pgPositions = {};
     var pgId = event.target.id();
-    console.log("pg Id", event.target);
-    positions[pgId] = {};
     var shapeNode = stageEl.current.findOne("#" + pgId);
+    var groupPos = shapeNode.absolutePosition();
     var pieces = shapeNode.getChildren();
-    pgPositions[pgId] = { x: shapeNode.x(), y: shapeNode.y() };
+    var changes = [];
     pieces.forEach((piece, i) => {
       console.log("piece id", piece.id());
       console.log("piece absolute pos", piece.absolutePosition());
       console.log("piece relative pos", piece.position());
-      positions[pgId][i] = { x: piece.position().x, y: piece.position().y };
+      var piecePos = piece.absolutePosition();
+
+      var pg = piece.id().split("-")[1];
+      var pid = piece.id().split("-")[2];
+      changes.push({ pgId: pg, pid: pid, pos: groupPos });
     });
-    console.log("piece positions", positions);
-    console.log("pg positions", pgPositions);
+    dispatch({
+      type: "updatePositions",
+      message: "updatePositions",
+      whichPieceGroup: pgId,
+      pos: groupPos
+    });
   }
   function removeShape(idx) {
     var whichPieceGroup = idx.split("-")[1];
@@ -434,16 +441,17 @@ export const ImprovSpace = () => {
             var pieces = shapeNode.getChildren();
 
             pieces.forEach((piece, i) => {
+              var piecePos = piece.absolutePosition();
+              var newPos = baseGroup.absolutePosition();
+              var oldPos = shapeNode.absolutePosition();
               changes.push({
                 oldPg: pgId,
                 newPg: bgId,
                 oldP: i,
                 newP: pieceId,
-                offset: getOffset(baseGroup, piece)
+                newPos: { x: oldPos.x - newPos.x, y: oldPos.y - newPos.y }
               });
               pieceId += 1;
-              // baseGroup.add(piece);
-              // shapeNode.remove(piece);
             });
           }
         });
@@ -463,8 +471,7 @@ export const ImprovSpace = () => {
         dispatch({
           type: "addCommand",
           message: "addCommand",
-          command: "sew",
-          stage: stageEl.current.toJSON()
+          command: "sew"
         });
       } else {
         dispatch({
@@ -602,7 +609,6 @@ export const ImprovSpace = () => {
     var splitPiece = false;
     selectedShapes.forEach((element) => {
       var t = element.getAbsoluteTransform().getTranslation();
-      console.log(t);
       var xOffset = t.x;
       var yOffset = t.y;
       var name = element.id();
@@ -611,10 +617,7 @@ export const ImprovSpace = () => {
       var data = element.data();
       var path = { type: "path", d: data };
       data = toPoints(path);
-      console.log(data, lineStart, lineEnd, xOffset, yOffset);
       var absoluteTransform = element.getAbsoluteTransform().decompose();
-      console.log(absoluteTransform);
-      console.log(element.x() + xOffset, element.y() + yOffset);
       var newBoundaries = splitShape(
         data,
         lineStart,
@@ -622,7 +625,6 @@ export const ImprovSpace = () => {
         xOffset,
         yOffset
       );
-      console.log(newBoundaries);
       if (Object.keys(newBoundaries).length == 2) {
         var replacePiece = state.pieceGroups[i].pieceData[j];
         replacePiece.scaledBoundary = newBoundaries[0];
@@ -638,27 +640,27 @@ export const ImprovSpace = () => {
 
         splitPiece = true;
 
-        var json = stageEl.current.toJSON();
-        var newData = {};
-        var dataURL = stageEl.current.toDataURL();
+        // var json = stageEl.current.toJSON();
+        // var newData = {};
+        // var dataURL = stageEl.current.toDataURL();
 
-        var shapes = stageEl.current.find(".improvShape");
-        var selectedShapes = shapes.filter((shape) => shape.isVisible());
-        var maxX = 0;
-        var maxY = 0;
-        selectedShapes.forEach((element) => {
-          var rect = element.getClientRect();
-          var x = rect.x + rect.width;
-          var y = rect.y + rect.height;
-          console.log(x, y);
-          if (x > maxX) {
-            maxX = x;
-          }
-          if (y > maxY) {
-            maxY = y;
-          }
-        });
-        console.log(selectedShapes);
+        // var shapes = stageEl.current.find(".improvShape");
+        // var selectedShapes = shapes.filter((shape) => shape.isVisible());
+        // var maxX = 0;
+        // var maxY = 0;
+        // selectedShapes.forEach((element) => {
+        //   var rect = element.getClientRect();
+        //   var x = rect.x + rect.width;
+        //   var y = rect.y + rect.height;
+        //   console.log(x, y);
+        //   if (x > maxX) {
+        //     maxX = x;
+        //   }
+        //   if (y > maxY) {
+        //     maxY = y;
+        //   }
+        // });
+        // console.log(selectedShapes);
 
         dispatch({
           type: "cutPiece",
@@ -766,6 +768,8 @@ export const ImprovSpace = () => {
                   draggable
                   onDrag={(e) => draggingGroup(e)}
                   onDragEnd={(e) => endDragShape(e)}
+                  x={state.pieceGroups[keyName].x}
+                  y={state.pieceGroups[keyName].y}
                 >
                   {Object.keys(state.pieceGroups[keyName].pieceData).map(
                     (pieceName, j) => (
@@ -773,8 +777,6 @@ export const ImprovSpace = () => {
                         name={"improvShape"}
                         id={"piece-" + keyName + "-" + pieceName}
                         key={"piece-" + keyName + "-" + pieceName}
-                        x={state.pieceGroups[keyName].pieceData[pieceName].x}
-                        y={state.pieceGroups[keyName].pieceData[pieceName].y}
                         data={
                           state.pieceGroups[keyName].pieceData[pieceName].svg
                         }
@@ -790,6 +792,8 @@ export const ImprovSpace = () => {
                             ? "black"
                             : "white"
                         }
+                        x={state.pieceGroups[keyName].pieceData[pieceName].x}
+                        y={state.pieceGroups[keyName].pieceData[pieceName].y}
                       />
                     )
                   )}
