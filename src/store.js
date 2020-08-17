@@ -113,25 +113,42 @@ const reducer = (state, action) => {
       return newState;
     case "duplicatePieces":
       var newPgs = [];
+      var pgIdsToDelete = [];
+      var newPgId1 =
+        parseInt(
+          Object.keys(state.pieceGroups)[
+            Object.keys(state.pieceGroups).length - 1
+          ]
+        ) + 1;
       state.selectedShapes.forEach((pgId, idx) => {
-        var newPieceGroupId = Object.keys(state.pieceGroups).length.toString();
+        var newPgId2 = newPgId1 + 1;
         var newPieceGroup = JSON.parse(JSON.stringify(state.pieceGroups[pgId]));
         newPieceGroup.x = newPieceGroup.x + action.offsets[pgId];
-        state.pieceGroups[newPieceGroupId] = newPieceGroup;
-        state.pieceGroups[newPieceGroupId].idx = newPieceGroupId;
-        state.onDesignWall[newPieceGroupId] = true;
-        state.pieceGroups[newPieceGroupId].onDesignWall = true;
-        state.pieceGroups[newPieceGroupId].isReal = false;
-        newPgs.push(newPieceGroupId);
+        state.pieceGroups[newPgId1.toString()] = newPieceGroup;
+        state.pieceGroups[newPgId1.toString()].idx = newPieceGroupId;
+        state.onDesignWall[newPgId1.toString()] = true;
+        state.pieceGroups[newPgId1.toString()].onDesignWall = true;
+        state.pieceGroups[newPgId1.toString()].isReal = false;
+        var newPieceGroup2 = JSON.parse(
+          JSON.stringify(state.pieceGroups[pgId])
+        );
+        state.pieceGroups[newPgId2.toString()] = newPieceGroup2;
+        newPgs.push(newPgId1.toString());
+        newPgs.push(newPgId2.toString());
+        pgIdsToDelete.push(pgId);
         state.history.push({
           action: "duplicate",
           parents: [pgId],
-          children: [pgId, newPieceGroupId]
+          children: [newPgId1.toString(), newPgId2.toString()]
         });
+        newPgId1 = newPgId2 + 1;
       });
       var newSelectedShapes = [...state.selectedShapes];
       newPgs.forEach((pg) => {
         newSelectedShapes.push(pg);
+      });
+      pgIdsToDelete.forEach((pg) => {
+        delete state.pieceGroups[pg];
       });
       state.selectedShapes = newSelectedShapes;
       state.message = action.message;
@@ -216,30 +233,20 @@ const reducer = (state, action) => {
         state.pieceGroups[idx].isReal = true;
         state.onDesignWall[idx] = false;
         state.pieceHistory[idx] = [];
-        state.history.push({
-          action: "cut",
-          parents: [null],
-          children: [idx]
-        });
-        if (Object.keys(state.pieceGroups[idx].pieceData).length > 1) {
-          state.history.push({
-            action: "sew",
-            parents: [null],
-            children: [idx]
-          });
-        }
-        // Object.keys(state.pieceGroups[idx].pieceData).forEach((pid, j) => {
-        //   state.pieceHistory[idx].push({
-        //     action: "cut",
-        //     pieceGroups: [idx],
-        //     pieces: [pid]
-        //   });
+        // state.history.push({
+        //   action: "cut",
+        //   parents: [null],
+        //   children: [idx],
+        //   stageBefore: null,
+        //   stageAfter: null
         // });
         // if (Object.keys(state.pieceGroups[idx].pieceData).length > 1) {
-        //   state.pieceHistory[idx].push({
+        //   state.history.push({
         //     action: "sew",
-        //     pieceGroups: [idx],
-        //     pieces: Object.keys(state.pieceGroups[idx].pieceData)
+        //     parents: [null],
+        //     children: [idx],
+        //     stageBefore: null,
+        //     stageAfter: null
         //   });
         // }
         idx += 1;
@@ -257,33 +264,54 @@ const reducer = (state, action) => {
         .onDesignWall;
       newState.onDesignWall[keyName] = !state.pieceGroups[keyName].onDesignWall;
       newState.message = action.message;
+      //error on multiple load
+      // state.history.push({
+      //   action: "cut",
+      //   parents: [null],
+      //   children: [keyName],
+      //   stageBefore: action.stageBefore,
+      //   stageAfter: action.stageAfter
+      // });
+      // if (Object.keys(state.pieceGroups[idx].pieceData).length > 1) {
+      //   state.history.push({
+      //     action: "sew",
+      //     parents: [null],
+      //     children: [keyName],
+      //     stageBefore: action.stageBefore,
+      //     stageAfter: action.stageAfter
+      //   });
+      // }
       return newState;
     case "updatePositions":
       var newState = JSON.parse(JSON.stringify(state));
-      console.log(action.changes);
-      // action.changes.forEach((change) => {
-      //   newState.pieceGroups[change.pgId].pieceData[change.pid].x =
-      //     change.pos.x;
-      //   newState.pieceGroups[change.pgId].pieceData[change.pid].x =
-      //     change.pos.y;
-      // });
       newState.pieceGroups[action.whichPieceGroup].x = action.pos.x;
       newState.pieceGroups[action.whichPieceGroup].y = action.pos.y;
       return newState;
     case "recolorPieceGroup":
       var newState = Object.assign({}, state);
+      var newPieceGroupId = (
+        parseInt(
+          Object.keys(state.pieceGroups)[
+            Object.keys(state.pieceGroups).length - 1
+          ]
+        ) + 1
+      ).toString();
       newState.message = action.message;
       newState.pieceGroups[action.whichPieceGroup].pieceData[
         action.whichPiece
       ].color = action.color;
       newState.pieceGroups[action.whichPieceGroup].isReal = false;
+      newState.pieceGroups[newPieceGroupId] = JSON.parse(
+        JSON.stringify(newState.pieceGroups[action.whichPieceGroup])
+      );
       newState.history.push({
         action: "recolor",
         parents: [action.whichPieceGroup],
-        children: [action.whichPieceGroup],
+        children: [newPieceGroupId],
         stageBefore: action.stageBefore,
         stageAfter: action.stageAfter
       });
+      delete newState.pieceGroups[action.whichPieceGroup];
       return newState;
     case "cutPiece":
       console.log(action.replacePiece, action.newPiece);
@@ -315,32 +343,10 @@ const reducer = (state, action) => {
         parents: [action.whichPieceGroup],
         children: [action.whichPieceGroup, newPieceGroupId]
       });
-      // state.pieceHistory[action.whichPieceGroup].push({
-      //   action: "cut",
-      //   pieceGroups: [action.whichPieceGroup, newPieceGroupId],
-      //   pieces: [0]
-      // });
-      // state.pieceHistory[newPieceGroupId].push({
-      //   action: "cut",
-      //   pieceGroups: [action.whichPieceGroup, newPieceGroupId],
-      //   pieces: [0]
-      // });
 
       console.log("in cut state is ", newState);
       return newState;
     case "finishEdit":
-      // for (var i=0; i<Object.keys(state.pieces).length; i++) {
-      //   var pieceKey = Object.keys(state.pieces)[i];
-      //   if (Object.keys(state.pieces[pieceKey]).indexOf("tempData") > -1) {
-      //     var tempData = state.pieces[pieceKey].tempData
-      //     console.log("updating piece ", pieceKey)
-      //     state.pieces[pieceKey].offsetX = tempData.x;
-      //     state.pieces[pieceKey].offsetY = tempData.y;
-      //     state.pieces[pieceKey].scaleX = tempData.scaleX;
-      //     state.pieces[pieceKey].scaleY = tempData.scaleY;
-      //     state.pieces[pieceKey].rotation = tempData.rotation;
-      //   }
-      // }
       action.newAttrs.forEach((element) => {
         var pg = element.whichPieceGroup;
         var p = element.whichPiece;

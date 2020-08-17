@@ -84,9 +84,8 @@ export const History = () => {
     });
   }
   function showHistory() {
-    console.log(state.history);
+    console.log("history", state.history);
     var instructions = [];
-    var reverseHistory = state.history.reverse();
     var nodes = [];
     var links = [];
     for (var i = 0; i < Object.keys(state.pieceGroups).length; i++) {
@@ -98,10 +97,7 @@ export const History = () => {
       var action = state.history[i].action;
       var svgImg =
         "http://marvel-force-chart.surge.sh/marvel_force_chart_img/marvel.png";
-      if (Object.keys(state.history[i]).indexOf("stageBefore") > -1) {
-        svgImg = state.history[i].stageBefore;
-      }
-      if (Object.keys(state.history[i]).indexOf("stageAfter") > -1) {
+      if (state.history[i]["stageAfter"]) {
         svgImg = state.history[i].stageAfter;
       }
       var existingNodes = [];
