@@ -7,6 +7,7 @@ import { useStore } from "./store";
 export const PieceBin = () => {
   const { state, dispatch } = useStore();
   const [openPieceBin, setPieceBin] = React.useState(false);
+  const imaginaryStage = React.createRef();
 
   function handleClick(e) {
     e.preventDefault();
@@ -20,7 +21,6 @@ export const PieceBin = () => {
       whichPiece: keyName
     });
   };
-
   function getPBPosition(pgId) {
     var piecePositions = [];
     for (

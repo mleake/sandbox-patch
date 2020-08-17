@@ -16,6 +16,7 @@ const initialState = {
   commandHistory: {},
   undoneCommands: [],
   fullHistory: {},
+  pieceHistory: {},
   history: []
 };
 
@@ -36,7 +37,8 @@ const reducer = (state, action) => {
         commandHistory: {},
         undoneCommands: [],
         fullHistory: {},
-        pieceHistory: {}
+        pieceHistory: {},
+        history: []
       };
     case "loadSavedState":
       return action.savedState;
@@ -65,6 +67,13 @@ const reducer = (state, action) => {
       };
       state.commandHistory = newCommandHistory;
       state.fullHistory = newFullHistory;
+      if (Object.keys(action).indexOf("stageBefore") > -1) {
+        state.history[state.history.length - 1].stageBefore =
+          action.stageBefore;
+      }
+      if (Object.keys(action).indexOf("stageAfter") > -1) {
+        state.history[state.history.length - 1].stageAfter = action.stageAfter;
+      }
       console.log("adding command", state.commandHistory);
       state.selectedShapes = [];
       return state;
@@ -206,9 +215,36 @@ const reducer = (state, action) => {
         state.pieceGroups[idx].y = 0;
         state.pieceGroups[idx].isReal = true;
         state.onDesignWall[idx] = false;
+        state.pieceHistory[idx] = [];
+        state.history.push({
+          action: "cut",
+          parents: [null],
+          children: [idx]
+        });
+        if (Object.keys(state.pieceGroups[idx].pieceData).length > 1) {
+          state.history.push({
+            action: "sew",
+            parents: [null],
+            children: [idx]
+          });
+        }
+        // Object.keys(state.pieceGroups[idx].pieceData).forEach((pid, j) => {
+        //   state.pieceHistory[idx].push({
+        //     action: "cut",
+        //     pieceGroups: [idx],
+        //     pieces: [pid]
+        //   });
+        // });
+        // if (Object.keys(state.pieceGroups[idx].pieceData).length > 1) {
+        //   state.pieceHistory[idx].push({
+        //     action: "sew",
+        //     pieceGroups: [idx],
+        //     pieces: Object.keys(state.pieceGroups[idx].pieceData)
+        //   });
+        // }
         idx += 1;
       }
-      console.log(state);
+      console.log("init state", state);
       state.message = action.message;
       return state;
     case "loadPieceGroup":
@@ -234,101 +270,6 @@ const reducer = (state, action) => {
       newState.pieceGroups[action.whichPieceGroup].x = action.pos.x;
       newState.pieceGroups[action.whichPieceGroup].y = action.pos.y;
       return newState;
-    // case "movePieceGroup":
-    //   state.pieceGroups[action.whichPieceGroup].pieceData[
-    //     action.whichPiece
-    //   ].canvasOffsetX = action.offsetX;
-    //   state.pieceGroups[action.whichPieceGroup].pieceData[
-    //     action.whichPiece
-    //   ].canvasOffsetY = action.offsetY;
-    //   state.pieceGroups[action.whichPieceGroup].pieceData[
-    //     action.whichPiece
-    //   ].rotation = action.rotation;
-    //   console.log(state);
-    //   return {
-    //     message: action.message,
-    //     pieces: state.pieces,
-    //     pieceGroups: state.pieceGroups,
-    //     selectedPieceID: state.selectedPieceID,
-    //     fabrics: state.fabrics,
-    //     onDesignWall: state.onDesignWall,
-    //     tool: action.tool,
-    //     selectedShapes: state.selectedShapes,
-    //     errorMessage: state.errorMessage
-    //   };
-    // case "addSeam":
-    //   var newState = Object.assign({}, state);
-    //   var newPieceGroupId = Object.keys(state.pieceGroups).length;
-    //   newState.pieceGroups[newPieceGroupId] = {};
-    //   newState.pieceGroups[newPieceGroupId].idx = newPieceGroupId;
-    //   newState.pieceGroups[newPieceGroupId].pieceData = {};
-    //   var maxX = 0;
-    //   var minX = 100000;
-    //   var maxY = 0;
-    //   var minY = 100000;
-    //   var width = 100;
-    //   var height = 100;
-    //   action.piecesToMove.forEach((element, idx) => {
-    //     var pgIdx = element.pieceGroup;
-    //     var pIdx = element.piece;
-    //     newState.pieceGroups[newPieceGroupId].pieceData[idx] =
-    //       state.pieceGroups[pgIdx].pieceData[pIdx];
-    //     newState.onDesignWall[pgIdx] = false;
-    //     newState.pieceGroups[newPieceGroupId].maxX =
-    //       state.pieceGroups[pgIdx].maxX;
-    //     newState.pieceGroups[newPieceGroupId].minX =
-    //       state.pieceGroups[pgIdx].minX;
-    //     newState.pieceGroups[newPieceGroupId].maxY =
-    //       state.pieceGroups[pgIdx].maxY;
-    //     newState.pieceGroups[newPieceGroupId].minY =
-    //       state.pieceGroups[pgIdx].minY;
-    //     newState.pieceGroups[newPieceGroupId].width =
-    //       state.pieceGroups[pgIdx].width;
-    //     newState.pieceGroups[newPieceGroupId].height =
-    //       state.pieceGroups[pgIdx].height;
-    //     delete newState.pieceGroups[pgIdx]; //delete whole piece group?
-    //   });
-    //   newState.onDesignWall[newPieceGroupId] = true;
-    //   newState.pieceGroups[newPieceGroupId].onDesignWall = true;
-
-    //   var returnVal = {
-    //     message: action.message,
-    //     pieces: state.pieces,
-    //     pieceGroups: newState.pieceGroups,
-    //     selectedPieceID: state.selectedPieceID,
-    //     fabrics: state.fabrics,
-    //     onDesignWall: state.onDesignWall,
-    //     addedSeam: true,
-    //     tool: action.tool,
-    //     selectedShapes: state.selectedShapes,
-    //     errorMessage: state.errorMessage
-    //   };
-    //   state = Object.assign({}, returnVal);
-    //   console.log(state);
-    //   return state;
-    // case "duplicatePieceGroup":
-    //   var newPieceGroupId = Object.keys(state.pieceGroups).length;
-    //   var newPieceGroup = Object.assign(
-    //     {},
-    //     state.pieceGroups[action.whichPieceGroup]
-    //   );
-    //   newPieceGroup.idx = newPieceGroupId;
-    //   state.pieceGroups[newPieceGroupId] = newPieceGroup;
-    //   var returnVal = {
-    //     message: action.message,
-    //     pieces: state.pieces,
-    //     pieceGroups: state.pieceGroups,
-    //     selectedPieceID: state.selectedPieceID,
-    //     fabrics: state.fabrics,
-    //     onDesignWall: state.onDesignWall,
-    //     addedSeam: true,
-    //     tool: action.tool,
-    //     selectedShapes: state.selectedShapes,
-    //     errorMessage: state.errorMessage
-    //   };
-    //   state = returnVal;
-    //   console.log(state);
-    //   return returnVal;
     case "recolorPieceGroup":
       var newState = Object.assign({}, state);
       newState.message = action.message;
@@ -336,6 +277,13 @@ const reducer = (state, action) => {
         action.whichPiece
       ].color = action.color;
       newState.pieceGroups[action.whichPieceGroup].isReal = false;
+      newState.history.push({
+        action: "recolor",
+        parents: [action.whichPieceGroup],
+        children: [action.whichPieceGroup],
+        stageBefore: action.stageBefore,
+        stageAfter: action.stageAfter
+      });
       return newState;
     case "cutPiece":
       console.log(action.replacePiece, action.newPiece);
@@ -367,6 +315,17 @@ const reducer = (state, action) => {
         parents: [action.whichPieceGroup],
         children: [action.whichPieceGroup, newPieceGroupId]
       });
+      // state.pieceHistory[action.whichPieceGroup].push({
+      //   action: "cut",
+      //   pieceGroups: [action.whichPieceGroup, newPieceGroupId],
+      //   pieces: [0]
+      // });
+      // state.pieceHistory[newPieceGroupId].push({
+      //   action: "cut",
+      //   pieceGroups: [action.whichPieceGroup, newPieceGroupId],
+      //   pieces: [0]
+      // });
+
       console.log("in cut state is ", newState);
       return newState;
     case "finishEdit":

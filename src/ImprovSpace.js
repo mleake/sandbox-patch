@@ -114,16 +114,20 @@ export const ImprovSpace = () => {
       var cr = shapeNode.getClientRect();
       offsets[pgId] = cr.width;
     });
+    var stageBefore = stageEl.current.toDataURL();
     dispatch({
       type: "duplicatePieces",
       message: "duplicatePieces",
       offsets: offsets
     });
+    var stageAfter = stageEl.current.toDataURL();
     dispatch({
       type: "addCommand",
       message: "addCommand",
       command: "duplicate",
-      display: true
+      display: true,
+      stageBefore: stageBefore,
+      stageAfter: stageAfter
     });
   }
 
@@ -146,6 +150,7 @@ export const ImprovSpace = () => {
   function selectNewColor(color, pgId, pieceId) {
     console.log("colorpg", state.selectedShapes);
     setShowColors([]);
+    var stageBefore = stageEl.current.toDataURL();
     dispatch({
       type: "recolorPieceGroup",
       message: "recolorPieceGroup",
@@ -153,11 +158,14 @@ export const ImprovSpace = () => {
       whichPiece: pieceId,
       color: color.hex
     });
+    var stageAfter = stageEl.current.toDataURL();
     dispatch({
       type: "addCommand",
       message: "addCommand",
       command: "recolor",
-      display: true
+      display: true,
+      stageBefore: stageBefore,
+      stageAfter: stageAfter
     });
   }
 
