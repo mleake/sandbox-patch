@@ -1,5 +1,7 @@
 // store.js
 import React, { createContext, useContext, useReducer } from "react";
+import { Graph } from "@dagrejs/graphlib";
+var gl = require("@dagrejs/graphlib");
 
 const StoreContext = createContext();
 const initialState = {
@@ -19,7 +21,9 @@ const initialState = {
   pieceHistory: {},
   history: [],
   historyTree: {},
-  historyMap: {}
+  historyMap: {},
+  graph: {},
+  treeId: 0
 };
 
 const reducer = (state, action) => {
@@ -42,7 +46,9 @@ const reducer = (state, action) => {
         pieceHistory: {},
         history: [],
         historyTree: {},
-        historyMap: {}
+        historyMap: {},
+        graph: {},
+        treeId: 0
       };
     case "loadSavedState":
       return action.savedState;
@@ -230,7 +236,7 @@ const reducer = (state, action) => {
       var newPieceGroups = action.newPieceGroups;
       var idx = Object.keys(state.pieceGroups).length;
       console.log(newPieceGroups);
-      var treeId = 0;
+      var graph = new Graph();
       for (var i = 0; i < Object.keys(newPieceGroups).length; i++) {
         state.pieceGroups[idx] = newPieceGroups[i];
         state.pieceGroups[idx].x = 0;
@@ -238,51 +244,26 @@ const reducer = (state, action) => {
         state.pieceGroups[idx].isReal = true;
         state.onDesignWall[idx] = false;
         state.pieceHistory[idx] = [];
+        state.historyMap[idx] = [];
         var pieceData = state.pieceGroups[idx].pieceData;
         var parents = [];
-        state.historyMap[idx] = [];
         for (var j = 0; j < Object.keys(pieceData).length; j++) {
           var pd = pieceData[Object.keys(pieceData)[j]];
-          state.historyTree[treeId] = {
-            name: treeId,
-            action: "cut",
-            pieceGroups: [idx],
-            pieces: [j],
-            parents: []
-          };
-          state.historyMap[idx].push(treeId);
-
-          treeId += 1;
+          graph.setNode("n" + state.treeId.toString(), "cut");
+          parents.push("n" + state.treeId.toString());
+          state.historyMap[idx].push("n" + state.treeId.toString());
+          state.treeId += 1;
         }
         if (Object.keys(pieceData).length > 1) {
-          state.historyTree[treeId] = {
-            name: treeId,
-            action: "sew",
-            pieceGroups: [idx],
-            pieces: Object.keys(pieceData),
-            parents: state.historyMap[idx]
-          };
-          state.historyMap[idx].push(treeId);
-          treeId += 1;
+          graph.setNode("n" + state.treeId.toString(), "sew");
+          graph.setEdge(parents[0], "n" + state.treeId.toString());
+          graph.setEdge(parents[1], "n" + state.treeId.toString());
+          state.historyMap[idx].push("n" + state.treeId.toString());
+          state.treeId += 1;
         }
-        // state.history.push({
-        //   action: "cut",
-        //   parents: [null],
-        //   children: [idx],
-        //   stageBefore: null,
-        //   stageAfter: null
-        // });
-        // if (Object.keys(state.pieceGroups[idx].pieceData).length > 1) {
-        //   state.history.push({
-        //     action: "sew",
-        //     parents: [null],
-        //     children: [idx],
-        //     stageBefore: null,
-        //     stageAfter: null
-        //   });
-        // }
         idx += 1;
       }
+      state.graph = gl.json.write(graph);
       console.log("init state", state);
       state.message = action.message;
       return state;
@@ -296,23 +277,6 @@ const reducer = (state, action) => {
         .onDesignWall;
       newState.onDesignWall[keyName] = !state.pieceGroups[keyName].onDesignWall;
       newState.message = action.message;
-      //error on multiple load
-      // state.history.push({
-      //   action: "cut",
-      //   parents: [null],
-      //   children: [keyName],
-      //   stageBefore: action.stageBefore,
-      //   stageAfter: action.stageAfter
-      // });
-      // if (Object.keys(state.pieceGroups[idx].pieceData).length > 1) {
-      //   state.history.push({
-      //     action: "sew",
-      //     parents: [null],
-      //     children: [keyName],
-      //     stageBefore: action.stageBefore,
-      //     stageAfter: action.stageAfter
-      //   });
-      // }
       return newState;
     case "updatePositions":
       var newState = JSON.parse(JSON.stringify(state));
@@ -347,65 +311,60 @@ const reducer = (state, action) => {
       return newState;
     case "cutPiece":
       console.log(action.replacePiece, action.newPiece);
-      var newState = Object.assign({}, state);
-      newState.message = action.message;
+      state.message = action.message;
       //add newPiece
       var newPieceGroupId = Object.keys(state.pieceGroups).length;
       var newPieceGroupId2 = newPieceGroupId + 1;
-      newState.pieceGroups[newPieceGroupId] = {};
-      newState.pieceGroups[newPieceGroupId].idx = newPieceGroupId;
-      newState.pieceGroups[newPieceGroupId].x =
-        newState.pieceGroups[action.whichPieceGroup].x + 5;
-      newState.pieceGroups[newPieceGroupId].pieceData = {};
-      newState.pieceGroups[newPieceGroupId].pieceData[0] = action.newPiece;
-      newState.pieceGroups[newPieceGroupId].onDesignWall = true;
-      newState.pieceGroups[newPieceGroupId].isReal = false;
-      newState.pieceGroups[newPieceGroupId].width =
-        newState.pieceGroups[action.whichPieceGroup].width;
-      newState.pieceGroups[newPieceGroupId].height =
-        newState.pieceGroups[action.whichPieceGroup].height;
-      newState.onDesignWall[newPieceGroupId] = true;
+      state.pieceGroups[newPieceGroupId] = {};
+      state.pieceGroups[newPieceGroupId].idx = newPieceGroupId;
+      state.pieceGroups[newPieceGroupId].x =
+        state.pieceGroups[action.whichPieceGroup].x + 5;
+      state.pieceGroups[newPieceGroupId].pieceData = {};
+      state.pieceGroups[newPieceGroupId].pieceData[0] = action.newPiece;
+      state.pieceGroups[newPieceGroupId].onDesignWall = true;
+      state.pieceGroups[newPieceGroupId].isReal = false;
+      state.pieceGroups[newPieceGroupId].width =
+        state.pieceGroups[action.whichPieceGroup].width;
+      state.pieceGroups[newPieceGroupId].height =
+        state.pieceGroups[action.whichPieceGroup].height;
+      state.onDesignWall[newPieceGroupId] = true;
       //replacePiece with half
-      newState.pieceGroups[action.whichPieceGroup].pieceData[
-        action.whichPiece
-      ] = action.replacePiece;
-      newState.pieceGroups[action.whichPieceGroup].isReal = false;
-      newState.onDesignWall[action.whichPieceGroup] = true;
+      state.pieceGroups[action.whichPieceGroup].pieceData[action.whichPiece] =
+        action.replacePiece;
+      state.pieceGroups[action.whichPieceGroup].isReal = false;
+      state.onDesignWall[action.whichPieceGroup] = true;
 
-      newState.pieceGroups[newPieceGroupId2] = JSON.parse(
-        JSON.stringify(newState.pieceGroups[action.whichPieceGroup])
+      state.pieceGroups[newPieceGroupId2] = JSON.parse(
+        JSON.stringify(state.pieceGroups[action.whichPieceGroup])
       );
-      newState.history.push({
-        action: "cut",
-        parents: [action.whichPieceGroup],
-        children: [newPieceGroupId, newPieceGroupId2]
-      });
-      var treeId = Object.keys(newState.historyTree).length;
-      newState.historyTree[treeId] = {
-        name: treeId,
-        action: "cut",
-        pieceGroups: [newPieceGroupId],
-        pieces: [0],
-        parents: [
-          state.historyMap[action.whichPieceGroup][
-            state.historyMap[action.whichPieceGroup].length - 1
-          ]
-        ]
-      };
-      newState.historyTree[treeId + 1] = {
-        name: treeId + 1,
-        action: "cut",
-        pieceGroups: [newPieceGroupId2],
-        pieces: [0],
-        parents: [
-          state.historyMap[action.whichPieceGroup][
-            state.historyMap[action.whichPieceGroup].length - 1
-          ]
-        ]
-      };
-      delete newState.pieceGroups[action.whichPieceGroup];
-      console.log("in cut state is ", newState);
-      return newState;
+      // newState.history.push({
+      //   action: "cut",
+      //   parents: [action.whichPieceGroup],
+      //   children: [newPieceGroupId, newPieceGroupId2]
+      // });
+      console.log("graph before", state.graph);
+      var graph = gl.json.read(state.graph);
+      var parent =
+        state.historyMap[action.whichPieceGroup][
+          state.historyMap[action.whichPieceGroup].length - 1
+        ];
+      console.log("treeId", state.treeId, parent);
+      graph.setNode("n" + state.treeId.toString(), "cut");
+      graph.setNode("n" + (state.treeId + 1).toString(), "cut");
+      graph.setEdge(parent, "n" + state.treeId.toString());
+      graph.setEdge(parent, "n" + (state.treeId + 1).toString());
+      state.graph = gl.json.write(graph);
+      state.historyMap[newPieceGroupId] = ["n" + state.treeId.toString()];
+      state.historyMap[newPieceGroupId2] = [
+        "n" + (state.treeId + 1).toString()
+      ];
+      state.treeId += 2;
+      state.graph = gl.json.write(graph);
+      console.log("graph after", state.graph);
+      delete state.pieceGroups[action.whichPieceGroup];
+
+      console.log("in cut state is ", state);
+      return state;
     case "finishEdit":
       action.newAttrs.forEach((element) => {
         var pg = element.whichPieceGroup;
