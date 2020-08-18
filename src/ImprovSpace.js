@@ -1,11 +1,9 @@
 import React, { useState } from "react";
 import Konva from "konva";
 import { Stage, Layer, Path, Group, Line, Rect, Circle } from "react-konva";
-import { splitShape, boundaryToSVG, closestEdgeToPoint } from "./helpers";
+import { splitShape, boundaryToSVG } from "./helpers";
 import { toPoints } from "svg-points";
-import ImprovTransformer from "./ImprovTransformer";
 import { useStore } from "./store";
-import { Box } from "@material-ui/core";
 import CropIcon from "@material-ui/icons/Crop";
 import PaletteIcon from "@material-ui/icons/Palette";
 import { GiResize, GiArrowCursor, GiSewingNeedle } from "react-icons/gi";
@@ -16,12 +14,10 @@ import { MdDelete, MdAddToPhotos } from "react-icons/md";
 import { RiSliceLine } from "react-icons/ri";
 import { Toolbar, Typography } from "@material-ui/core";
 import { IconButton } from "@material-ui/core";
-import { Button } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core";
-import { pink100 } from "material-ui/styles/colors";
 import { CirclePicker } from "react-color";
 import { History } from "./History";
-import { Container, Row, Col } from "react-bootstrap";
+import { Row } from "react-bootstrap";
 
 const useStyles = makeStyles((theme) => ({
   iconButton: {
@@ -34,19 +30,14 @@ export const ImprovSpace = () => {
   const { state, dispatch } = useStore();
   const stageEl = React.createRef();
   const layerEl = React.createRef();
-  const selectionRectRef = React.createRef();
-  const tr = React.createRef();
   const [startCut, setStartCut] = useState(false);
   const [finishedCut, setFinishedCut] = useState(false);
   const [cutPoints, setCutPoints] = useState({
     start: { x: 0, y: 0 },
     end: { x: 0, y: 0 }
   });
-  const [localTool, setLocalTool] = useState("");
   const [helperText, setHelperText] = useState("");
-  const [showColorPalette, setShowColorPalette] = useState(false);
   const [showColors, setShowColors] = useState([]);
-  const [madeSeam, setMadeSeam] = useState(false);
   const classes = useStyles();
 
   function fillHelperText(tool) {
@@ -84,20 +75,19 @@ export const ImprovSpace = () => {
     ev.preventDefault;
     // setMadeSeam(false);
     var tool = ev.currentTarget.value;
-    setLocalTool(tool);
 
-    if (tool == "duplicatetool") {
+    if (tool === "duplicatetool") {
       handleDuplicate();
-    } else if (tool == "colortool") {
+    } else if (tool === "colortool") {
       showColorChoices();
-    } else if (tool == "sewtool") {
+    } else if (tool === "sewtool") {
       handleSew();
       // setMadeSeam(true);
-    } else if (tool == "deletetool") {
+    } else if (tool === "deletetool") {
       handleDelete();
-    } else if (tool == "savetool") {
+    } else if (tool === "savetool") {
       handleSave();
-    } else if (tool == "loadtool") {
+    } else if (tool === "loadtool") {
       handleLoad();
     }
     dispatch({
@@ -129,10 +119,6 @@ export const ImprovSpace = () => {
       stageBefore: stageBefore,
       stageAfter: stageAfter
     });
-  }
-
-  function handleRecolor() {
-    setShowColorPalette(true);
   }
 
   function getColorsFromFabrics() {
@@ -188,46 +174,46 @@ export const ImprovSpace = () => {
     var buttonText;
     var disabledOne = false;
     var disabledTwo = false;
-    if (tool == "selecttool") {
+    if (tool === "selecttool") {
       buttonText = "select";
       symbol = <GiArrowCursor />;
-    } else if (tool == "slicetool") {
+    } else if (tool === "slicetool") {
       buttonText = "cut";
       symbol = <RiSliceLine />;
       disabledOne = true;
-    } else if (tool == "sewtool") {
+    } else if (tool === "sewtool") {
       buttonText = "sew";
       symbol = <GiSewingNeedle />;
       disabledTwo = true;
-    } else if (tool == "duplicatetool") {
+    } else if (tool === "duplicatetool") {
       buttonText = "duplicate";
       symbol = <MdAddToPhotos />;
       disabledOne = true;
-    } else if (tool == "colortool") {
+    } else if (tool === "colortool") {
       buttonText = "recolor";
       symbol = <PaletteIcon />;
       disabledOne = true;
-    } else if (tool == "resizeTool") {
+    } else if (tool === "resizeTool") {
       buttonText = "resize";
       symbol = <GiResize />;
       disabledOne = true;
-    } else if (tool == "croptool") {
+    } else if (tool === "croptool") {
       buttonText = "crop";
       symbol = <CropIcon />;
       disabledOne = true;
-    } else if (tool == "savetool") {
+    } else if (tool === "savetool") {
       buttonText = "save";
       symbol = <AiOutlineSave />;
-    } else if (tool == "loadtool") {
+    } else if (tool === "loadtool") {
       buttonText = "load";
       symbol = <AiOutlineFolderOpen />;
-    } else if (tool == "redotool") {
+    } else if (tool === "redotool") {
       buttonText = "redo";
       symbol = <GrRedo />;
-    } else if (tool == "undotool") {
+    } else if (tool === "undotool") {
       buttonText = "undo";
       symbol = <GrUndo />;
-    } else if (tool == "deletetool") {
+    } else if (tool === "deletetool") {
       buttonText = "delete";
       symbol = <MdDelete />;
       disabledOne = true;
@@ -299,21 +285,14 @@ export const ImprovSpace = () => {
     e.preventDefault;
     console.log("mouse down");
     console.log(state.tool);
-    if (state.tool == "slicetool") {
+    if (state.tool === "slicetool") {
       beginCut(e);
-    }
-  }
-
-  function handleStageMouseMove(e) {
-    console.log("mouse move");
-    if (state.tool == "slicetool") {
-      moveCut(e);
     }
   }
 
   function handleStageMouseUp(e) {
     console.log("mouse up");
-    if (state.tool == "slicetool") {
+    if (state.tool === "slicetool") {
       endCut(e);
       console.log(state);
     }
@@ -344,18 +323,15 @@ export const ImprovSpace = () => {
   }
 
   function endDragShape(event) {
-    var positions = {};
-    var pgPositions = {};
     var pgId = event.target.id();
     var shapeNode = stageEl.current.findOne("#" + pgId);
     var groupPos = shapeNode.absolutePosition();
     var pieces = shapeNode.getChildren();
     var changes = [];
     pieces.forEach((piece, i) => {
-      console.log("piece id", piece.id());
-      console.log("piece absolute pos", piece.absolutePosition());
-      console.log("piece relative pos", piece.position());
-      var piecePos = piece.absolutePosition();
+      // console.log("piece id", piece.id());
+      // console.log("piece absolute pos", piece.absolutePosition());
+      // console.log("piece relative pos", piece.position());
 
       var pg = piece.id().split("-")[1];
       var pid = piece.id().split("-")[2];
@@ -416,22 +392,20 @@ export const ImprovSpace = () => {
     return dist;
   }
 
-  function getOffset(p1, p2) {
-    var cr1 = p1.getClientRect();
-    var pos1 = p1.absolutePosition();
-    var c1x = pos1.x + cr1.width / 2;
-    var c1y = pos1.y + cr1.height / 2;
+  // function getOffset(p1, p2) {
+  //   var cr1 = p1.getClientRect();
+  //   var pos1 = p1.absolutePosition();
+  //   var c1x = pos1.x + cr1.width / 2;
+  //   var c1y = pos1.y + cr1.height / 2;
 
-    var cr2 = p2.getClientRect();
-    var pos2 = p2.absolutePosition();
-    var c2x = pos2.x + cr2.width / 2;
-    var c2y = pos2.y + cr2.height / 2;
-    return { x: c2x - c1x, y: c2y - c1y };
-  }
+  //   var cr2 = p2.getClientRect();
+  //   var pos2 = p2.absolutePosition();
+  //   var c2x = pos2.x + cr2.width / 2;
+  //   var c2y = pos2.y + cr2.height / 2;
+  //   return { x: c2x - c1x, y: c2y - c1y };
+  // }
 
   function checkSew() {
-    var shapeEls = [];
-    var seamDistances = [];
     var seamsClose = true;
     for (var i = 0; i < state.selectedShapes.length; i++) {
       var shapeId1 = state.selectedShapes[i];
@@ -440,7 +414,7 @@ export const ImprovSpace = () => {
         var shapeId2 = state.selectedShapes[j];
         var n2 = stageEl.current.findOne("#" + shapeId2);
         console.log("here", shapeId1, n1, shapeId2, n2);
-        if (n1 && n2 && n1 != n2) {
+        if (n1 && n2 && n1 !== n2) {
           var dist = getDistanceBetweenPieces(n1, n2);
           console.log("dist", dist);
           if (dist > 10) {
@@ -453,7 +427,6 @@ export const ImprovSpace = () => {
   }
 
   function handleSew() {
-    var piecesToSew = [];
     var checkDist = checkSew();
 
     if (state.selectedShapes.length > 0) {
@@ -463,7 +436,7 @@ export const ImprovSpace = () => {
         var pieceId = 0;
         var changes = [];
         state.selectedShapes.map((pgId, i) => {
-          if (i == 0) {
+          if (i === 0) {
             baseGroup = stageEl.current.findOne("#" + pgId);
             bgId = pgId;
             pieceId += baseGroup.getChildren().length;
@@ -472,7 +445,7 @@ export const ImprovSpace = () => {
             var pieces = shapeNode.getChildren();
 
             pieces.forEach((piece, i) => {
-              var piecePos = piece.absolutePosition();
+              // var piecePos = piece.absolutePosition();
               var newPos = baseGroup.absolutePosition();
               var oldPos = shapeNode.absolutePosition();
               changes.push({
@@ -550,34 +523,33 @@ export const ImprovSpace = () => {
     }
   }
 
-  function convertStageToPieceGroup() {
-    var groups = layerEl.current.getChildren();
-    var pieceGroups = {};
-    groups.forEach((group, pgid) => {
-      var newID = group.id();
-      pieceGroups[newID] = {};
-      pieces = group.getChildren();
-      console.log("pieces", pieces);
-      var usedIds = [];
-      pieceGroups[pgid] = state.pieceGroups[newID];
-      pieceGroups[pgid].pieceData = {};
-      pieces.forEach((piece, pid) => {
-        var idx = piece.id();
-        var oldPgId = idx.split("-")[1];
-        var oldPId = idx.split("-")[2];
-        pieceGroups[pgid].pieceData[pid] =
-          state.pieceGroups[oldPgId].pieceData[oldPId];
-        var absoluteTransform = piece.getAbsoluteTransform().decompose();
-        console.log("abs transform", absoluteTransform);
-        console.log(pieceGroups[pgid]);
-        pieceGroups[pgid].pieceData[pid].x = absoluteTransform.x;
-        pieceGroups[pgid].pieceData[pid].y = absoluteTransform.y;
-      });
-    });
-    return pieceGroups;
-  }
+  // function convertStageToPieceGroup() {
+  //   var groups = layerEl.current.getChildren();
+  //   var pieceGroups = {};
+  //   groups.forEach((group, pgid) => {
+  //     var newID = group.id();
+  //     pieceGroups[newID] = {};
+  //     pieces = group.getChildren();
+  //     console.log("pieces", pieces);
+  //     pieceGroups[pgid] = state.pieceGroups[newID];
+  //     pieceGroups[pgid].pieceData = {};
+  //     pieces.forEach((piece, pid) => {
+  //       var idx = piece.id();
+  //       var oldPgId = idx.split("-")[1];
+  //       var oldPId = idx.split("-")[2];
+  //       pieceGroups[pgid].pieceData[pid] =
+  //         state.pieceGroups[oldPgId].pieceData[oldPId];
+  //       var absoluteTransform = piece.getAbsoluteTransform().decompose();
+  //       console.log("abs transform", absoluteTransform);
+  //       console.log(pieceGroups[pgid]);
+  //       pieceGroups[pgid].pieceData[pid].x = absoluteTransform.x;
+  //       pieceGroups[pgid].pieceData[pid].y = absoluteTransform.y;
+  //     });
+  //   });
+  //   return pieceGroups;
+  // }
   function handleMouseMove() {
-    if (state.tool == "slicetool") {
+    if (state.tool === "slicetool") {
       moveCut();
     }
   }
@@ -647,7 +619,7 @@ export const ImprovSpace = () => {
         xOffset,
         yOffset
       );
-      if (Object.keys(newBoundaries).length == 2) {
+      if (Object.keys(newBoundaries).length === 2) {
         var replacePiece = state.pieceGroups[i].pieceData[j];
         replacePiece.scaledBoundary = newBoundaries[0];
         replacePiece.svg = boundaryToSVG(newBoundaries[0]);
@@ -795,7 +767,6 @@ export const ImprovSpace = () => {
                       id={keyName}
                       key={keyName}
                       draggable
-                      onDrag={(e) => draggingGroup(e)}
                       onDragEnd={(e) => endDragShape(e)}
                       x={state.pieceGroups[keyName].x}
                       y={state.pieceGroups[keyName].y}
@@ -839,7 +810,7 @@ export const ImprovSpace = () => {
                     </Group>
                   );
                 })}
-                {(startCut || finishedCut) && state.tool == "slicetool" && (
+                {(startCut || finishedCut) && state.tool === "slicetool" && (
                   <>
                     <Circle
                       x={cutPoints.end.x}

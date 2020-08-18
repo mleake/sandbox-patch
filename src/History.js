@@ -1,23 +1,7 @@
 import React, { useState } from "react";
 import { useStore } from "./store";
-import Konva from "konva";
-import {
-  Stage,
-  Layer,
-  Path,
-  Group,
-  Line,
-  Rect,
-  Circle,
-  Container,
-  Node
-} from "react-konva";
-import {
-  IconButton,
-  Checkbox,
-  FormControlLabel,
-  Button
-} from "@material-ui/core";
+import { Stage, Layer, Path, Group } from "react-konva";
+import { Checkbox, FormControlLabel, Button } from "@material-ui/core";
 import { Graph } from "react-d3-graph";
 // the graph configuration, you only need to pass down properties
 // that you want to override, otherwise default ones will be used
@@ -25,16 +9,16 @@ const myConfig = {
   automaticRearrangeAfterDropNode: false,
   collapsible: false,
   directed: true,
-  height: 400,
+  height: 800,
   highlightDegree: 1,
   highlightOpacity: 0.2,
   linkHighlightBehavior: true,
   maxZoom: 8,
   minZoom: 0.1,
-  nodeHighlightBehavior: true,
+  nodeHighlightBehavior: false,
   panAndZoom: false,
   staticGraph: false,
-  width: 800,
+  width: 200,
   node: {
     color: "#d3d3d3",
     fontColor: "black",
@@ -180,7 +164,7 @@ export const History = () => {
   return (
     <div className="HistoryBar">
       <>
-        <Button onClick={() => showHistory()}>show history</Button>
+        {/* <Button onClick={() => showHistory()}>show history</Button> */}
         <h1> History </h1>
         {Object.keys(state.commandHistory).map((command, i) => {
           const storedPieceGroups =
@@ -263,7 +247,6 @@ export const History = () => {
           config={myConfig}
         />
       )}
-      ;
     </div>
   );
 };

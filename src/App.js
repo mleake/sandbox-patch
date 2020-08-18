@@ -4,7 +4,8 @@ import { Loader } from "./Loader";
 import { StoreProvider } from "./store";
 import { ImprovSpace } from "./ImprovSpace";
 import { Layout } from "./Layout";
-import D3Graph from "./D3Graph";
+// import D3Graph from "./D3Graph";
+import { TreeGraph } from "./TreeGraph";
 
 import * as JSONdata from "./data.json";
 import { Container, Row, Col } from "react-bootstrap";
@@ -21,7 +22,6 @@ export default class App extends React.Component {
     return (
       <div className="App">
         <StoreProvider>
-          <D3Graph data={[5, 10, 1, 3]} size={[500, 500]} />
           <Loader data={JSONdata} />
           <div className="float-container">
             <ImprovSpace />
