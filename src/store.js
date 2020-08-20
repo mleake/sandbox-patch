@@ -2,6 +2,7 @@
 import React, { createContext, useContext, useReducer } from "react";
 import { Graph } from "@dagrejs/graphlib";
 var gl = require("@dagrejs/graphlib");
+var dagre = require("dagre");
 
 const StoreContext = createContext();
 const initialState = {
@@ -174,6 +175,7 @@ const reducer = (state, action) => {
         parents: [],
         children: []
       };
+
       action.changes.forEach((change, idx) => {
         var pieceData = JSON.parse(
           JSON.stringify(state.pieceGroups[change.oldPg].pieceData[change.oldP])
@@ -191,6 +193,16 @@ const reducer = (state, action) => {
         if (oldPg.indexOf(change.oldPg) < 0) {
           oldPg.push(change.oldPg);
         }
+        var parent =
+          state.historyMap[change.oldPg][
+            state.historyMap[change.oldPg].length - 1
+          ];
+        graph.setNode("n" + state.treeId.toString(), "sew");
+        state.historyMap[change.newPg].push("n" + state.treeId.toString());
+
+        graph.setEdge(parent, "n" + state.treeId.toString());
+        state.historyMap[idx].push("n" + state.treeId.toString());
+        state.treeId += 1;
       });
       newState.history.push(history);
       oldPg.forEach((pgId) => {
@@ -235,37 +247,66 @@ const reducer = (state, action) => {
     case "addPieceGroup":
       var newPieceGroups = action.newPieceGroups;
       var idx = Object.keys(state.pieceGroups).length;
-      console.log(newPieceGroups);
-      var graph = new Graph();
+      const g = new dagre.graphlib.Graph();
+      g.setGraph({
+        rankdir: "LR"
+      });
+      g.setDefaultEdgeLabel(function () {
+        return {};
+      });
+      g.setNode("t1", { label: "t1: Kevin Spacey", width: 140, height: 100 });
+      g.setNode("t2", { label: "t2: Saul Williams", width: 140, height: 100 });
+      g.setNode("t3", { label: "t3: Brad Pitt", width: 140, height: 100 });
+      g.setNode("t4", { label: "t4: Harrison Ford", width: 140, height: 100 });
+      g.setNode("t5", { label: "t5: Luke Wilson", width: 140, height: 100 });
+      g.setNode("t6", { label: "t6: Kevin Bacon", width: 140, height: 100 });
+      g.setEdge("t2", "t1");
+      g.setEdge("t5", "t4");
+      g.setEdge("t6", "t4");
+      g.setEdge("t6", "t3");
+
+      // var graph = new dagre.graphlib.Graph();
+      // graph.setDefaultEdgeLabel(function () {
+      //   return {};
+      // });
       for (var i = 0; i < Object.keys(newPieceGroups).length; i++) {
         state.pieceGroups[idx] = newPieceGroups[i];
         state.pieceGroups[idx].x = 0;
         state.pieceGroups[idx].y = 0;
         state.pieceGroups[idx].isReal = true;
-        state.onDesignWall[idx] = false;
-        state.pieceHistory[idx] = [];
         state.historyMap[idx] = [];
         var pieceData = state.pieceGroups[idx].pieceData;
         var parents = [];
         for (var j = 0; j < Object.keys(pieceData).length; j++) {
           var pd = pieceData[Object.keys(pieceData)[j]];
-          graph.setNode("n" + state.treeId.toString(), "cut");
+          // graph.setNode("n" + state.treeId.toString(), {
+          //   label: "cut"
+          // });
           parents.push("n" + state.treeId.toString());
           state.historyMap[idx].push("n" + state.treeId.toString());
           state.treeId += 1;
         }
-        if (Object.keys(pieceData).length > 1) {
-          graph.setNode("n" + state.treeId.toString(), "sew");
-          graph.setEdge(parents[0], "n" + state.treeId.toString());
-          graph.setEdge(parents[1], "n" + state.treeId.toString());
-          state.historyMap[idx].push("n" + state.treeId.toString());
-          state.treeId += 1;
-        }
+        // if (Object.keys(pieceData).length > 1) {
+        //   graph.setNode("n" + state.treeId.toString(), {
+        //     label: "sew"
+        //   });
+        //   graph.setEdge(parents[0], "n" + state.treeId.toString());
+        //   graph.setEdge(parents[1], "n" + state.treeId.toString());
+        //   state.historyMap[idx].push("n" + state.treeId.toString());
+        //   state.treeId += 1;
+        // }
         idx += 1;
       }
-      state.graph = gl.json.write(graph);
-      console.log("init state", state);
+      // if (graph.nodeCount() > 0) {
+      //   console.log("graph dagre", dagre.layout(graph));
+      // }
+      // state.graph = gl.json.write(g);
+      console.log("before", g);
+      dagre.layout(g);
+      console.log("after", g);
+      state.graph = g;
       state.message = action.message;
+      console.log("init state", state);
       return state;
     case "loadPieceGroup":
       var keyName = action.whichPiece;
@@ -349,8 +390,16 @@ const reducer = (state, action) => {
           state.historyMap[action.whichPieceGroup].length - 1
         ];
       console.log("treeId", state.treeId, parent);
-      graph.setNode("n" + state.treeId.toString(), "cut");
-      graph.setNode("n" + (state.treeId + 1).toString(), "cut");
+      graph.setNode("n" + state.treeId.toString(), {
+        label: "cut",
+        width: 20,
+        height: 20
+      });
+      graph.setNode("n" + (state.treeId + 1).toString(), {
+        label: "cut",
+        width: 20,
+        height: 20
+      });
       graph.setEdge(parent, "n" + state.treeId.toString());
       graph.setEdge(parent, "n" + (state.treeId + 1).toString());
       state.graph = gl.json.write(graph);
@@ -360,7 +409,7 @@ const reducer = (state, action) => {
       ];
       state.treeId += 2;
       state.graph = gl.json.write(graph);
-      console.log("graph after", state.graph);
+
       delete state.pieceGroups[action.whichPieceGroup];
 
       console.log("in cut state is ", state);
