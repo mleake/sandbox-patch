@@ -1,6 +1,11 @@
 // store.js
 import React, { createContext, useContext, useReducer } from "react";
 import { Graph } from "@dagrejs/graphlib";
+import {
+  scaleBoundaryToPiece,
+  boundaryToSVG,
+  buildSVGNodeLabel
+} from "./helpers.js";
 var gl = require("@dagrejs/graphlib");
 var dagre = require("dagre");
 const normalize = require("normalize-svg-coords");
@@ -276,29 +281,33 @@ const reducer = (state, action) => {
         var compoundSVG = "";
         for (var j = 0; j < Object.keys(pieceData).length; j++) {
           var pd = pieceData[Object.keys(pieceData)[j]];
-          const normalizedPath = normalize({
-            viewBox: "0 0 100 100",
-            path: pd.svg,
-            min: 0,
-            max: 100,
-            asList: false
-          });
+          var boundary = scaleBoundaryToPiece(
+            pd,
+            (targetWidth = 50),
+            (targetHeight = 50)
+          );
+          var mysvg = buildSVGNodeLabel(state.pieceGroups[idx], j, "cut");
+          console.log(mysvg);
           graph.setNode("n" + state.treeId.toString(), {
-            label:
-              "<div><p>cut</p>" +
-              '<svg width="80" height="80"><path d="' +
-              normalizedPath +
-              '" style="fill:' +
-              pd.color +
-              ';"/></div>'
+            label: mysvg
           });
           parents.push("n" + state.treeId.toString());
           state.historyMap[idx].push("n" + state.treeId.toString());
           state.treeId += 1;
         }
         if (Object.keys(pieceData).length > 1) {
+          // graph.setNode("n" + state.treeId.toString(), {
+          //   label: "<p>sew</p>"
+          // });
+          var boundary = scaleBoundaryToPiece(
+            pd,
+            (targetWidth = 50),
+            (targetHeight = 50)
+          );
+          var mysvg = buildSVGNodeLabel(state.pieceGroups[idx], j, "sew");
+          console.log(mysvg);
           graph.setNode("n" + state.treeId.toString(), {
-            label: "<p>sew</p>"
+            label: mysvg
           });
           graph.setEdge(parents[0], "n" + state.treeId.toString());
           graph.setEdge(parents[1], "n" + state.treeId.toString());
