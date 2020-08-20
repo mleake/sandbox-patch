@@ -12,24 +12,24 @@ import { useStore } from "./store";
 var gl = require("@dagrejs/graphlib");
 var dagre = require("dagre");
 
-export const D3Graph = () => {
+export const D3DagreGraph = () => {
   const { state, dispatch } = useStore();
   const [localGraph, setLocalGraph] = React.useState(null);
   const [readyToRender, setReadyToRender] = React.useState(false);
 
   function createGraph() {
     console.log(state.graph);
-    var g = state.graph;
-    var nodes = {};
+    var g = gl.json.read(state.graph);
+    var nodes = [];
     var edges = [];
     var graphNodes = g.nodes();
-    graphNodes.forEach((node) => {
+    graphNodes.forEach((node, i) => {
       console.log(g.node(node));
-      nodes[node] = { label: g.node(node).label };
+      nodes.push({ id: node, label: g.node(node).label, labelType: "html" });
     });
     var graphEdges = g.edges();
     graphEdges.forEach((edge) => {
-      edges.push([edge.v, edge.w, {}]);
+      edges.push({ source: edge.v, target: edge.w });
     });
     console.log("nodes", nodes);
     console.log("edges", edges);
@@ -41,7 +41,23 @@ export const D3Graph = () => {
     return (
       <>
         <button onClick={() => createGraph()}>graph</button>
-        <DagreD3Component nodes={localGraph.nodes} edges={localGraph.edges} />
+        <DagreGraph
+          nodes={localGraph.nodes}
+          links={localGraph.edges}
+          config={{
+            rankdir: "LR",
+            align: "UL",
+            ranker: "tight-tree"
+          }}
+          width="500"
+          height="500"
+          animate={1000}
+          shape="circle"
+          fitBoundaries
+          zoomable
+          onNodeClick={(e) => console.log(e)}
+          onRelationshipClick={(e) => console.log(e)}
+        />{" "}
       </>
     );
   } else {

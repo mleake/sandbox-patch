@@ -3,6 +3,7 @@ import React, { createContext, useContext, useReducer } from "react";
 import { Graph } from "@dagrejs/graphlib";
 var gl = require("@dagrejs/graphlib");
 var dagre = require("dagre");
+const normalize = require("normalize-svg-coords");
 
 const StoreContext = createContext();
 const initialState = {
@@ -248,27 +249,22 @@ const reducer = (state, action) => {
       var newPieceGroups = action.newPieceGroups;
       var idx = Object.keys(state.pieceGroups).length;
       const g = new dagre.graphlib.Graph();
-      g.setGraph({
-        rankdir: "LR"
-      });
-      g.setDefaultEdgeLabel(function () {
+
+      // g.setNode("t1", { label: "t1: Kevin Spacey", width: 140, height: 100 });
+      // g.setNode("t2", { label: "t2: Saul Williams", width: 140, height: 100 });
+      // g.setNode("t3", { label: "t3: Brad Pitt", width: 140, height: 100 });
+      // g.setNode("t4", { label: "t4: Harrison Ford", width: 140, height: 100 });
+      // g.setNode("t5", { label: "t5: Luke Wilson", width: 140, height: 100 });
+      // g.setNode("t6", { label: "t6: Kevin Bacon", width: 140, height: 100 });
+      // g.setEdge("t2", "t1");
+      // g.setEdge("t5", "t4");
+      // g.setEdge("t6", "t4");
+      // g.setEdge("t6", "t3");
+
+      var graph = new dagre.graphlib.Graph();
+      graph.setDefaultEdgeLabel(function () {
         return {};
       });
-      g.setNode("t1", { label: "t1: Kevin Spacey", width: 140, height: 100 });
-      g.setNode("t2", { label: "t2: Saul Williams", width: 140, height: 100 });
-      g.setNode("t3", { label: "t3: Brad Pitt", width: 140, height: 100 });
-      g.setNode("t4", { label: "t4: Harrison Ford", width: 140, height: 100 });
-      g.setNode("t5", { label: "t5: Luke Wilson", width: 140, height: 100 });
-      g.setNode("t6", { label: "t6: Kevin Bacon", width: 140, height: 100 });
-      g.setEdge("t2", "t1");
-      g.setEdge("t5", "t4");
-      g.setEdge("t6", "t4");
-      g.setEdge("t6", "t3");
-
-      // var graph = new dagre.graphlib.Graph();
-      // graph.setDefaultEdgeLabel(function () {
-      //   return {};
-      // });
       for (var i = 0; i < Object.keys(newPieceGroups).length; i++) {
         state.pieceGroups[idx] = newPieceGroups[i];
         state.pieceGroups[idx].x = 0;
@@ -277,34 +273,42 @@ const reducer = (state, action) => {
         state.historyMap[idx] = [];
         var pieceData = state.pieceGroups[idx].pieceData;
         var parents = [];
+        var compoundSVG = "";
         for (var j = 0; j < Object.keys(pieceData).length; j++) {
           var pd = pieceData[Object.keys(pieceData)[j]];
-          // graph.setNode("n" + state.treeId.toString(), {
-          //   label: "cut"
-          // });
+          const normalizedPath = normalize({
+            viewBox: "0 0 100 100",
+            path: pd.svg,
+            min: 0,
+            max: 100,
+            asList: false
+          });
+          graph.setNode("n" + state.treeId.toString(), {
+            label:
+              "<div><p>cut</p>" +
+              '<svg width="80" height="80"><path d="' +
+              normalizedPath +
+              '" style="fill:' +
+              pd.color +
+              ';"/></div>'
+          });
           parents.push("n" + state.treeId.toString());
           state.historyMap[idx].push("n" + state.treeId.toString());
           state.treeId += 1;
         }
-        // if (Object.keys(pieceData).length > 1) {
-        //   graph.setNode("n" + state.treeId.toString(), {
-        //     label: "sew"
-        //   });
-        //   graph.setEdge(parents[0], "n" + state.treeId.toString());
-        //   graph.setEdge(parents[1], "n" + state.treeId.toString());
-        //   state.historyMap[idx].push("n" + state.treeId.toString());
-        //   state.treeId += 1;
-        // }
+        if (Object.keys(pieceData).length > 1) {
+          graph.setNode("n" + state.treeId.toString(), {
+            label: "<p>sew</p>"
+          });
+          graph.setEdge(parents[0], "n" + state.treeId.toString());
+          graph.setEdge(parents[1], "n" + state.treeId.toString());
+          state.historyMap[idx].push("n" + state.treeId.toString());
+          state.treeId += 1;
+        }
         idx += 1;
       }
-      // if (graph.nodeCount() > 0) {
-      //   console.log("graph dagre", dagre.layout(graph));
-      // }
-      // state.graph = gl.json.write(g);
-      console.log("before", g);
-      dagre.layout(g);
-      console.log("after", g);
-      state.graph = g;
+      state.graph = gl.json.write(graph);
+      // state.graph = graph;
       state.message = action.message;
       console.log("init state", state);
       return state;
@@ -390,25 +394,48 @@ const reducer = (state, action) => {
           state.historyMap[action.whichPieceGroup].length - 1
         ];
       console.log("treeId", state.treeId, parent);
+      var normalizedPath = normalize({
+        viewBox: "0 0 100 100",
+        path: state.pieceGroups[newPieceGroupId].pieceData[0].svg,
+        min: 0,
+        max: 100,
+        asList: false
+      });
       graph.setNode("n" + state.treeId.toString(), {
-        label: "cut",
-        width: 20,
-        height: 20
+        label:
+          "<div><p>cut</p>" +
+          '<svg width="80" height="80"><path d="' +
+          normalizedPath +
+          '" style="fill:' +
+          state.pieceGroups[newPieceGroupId].pieceData[0].color +
+          ';"/></div>'
+      });
+      normalizedPath = normalize({
+        viewBox: "0 0 100 100",
+        path: state.pieceGroups[action.whichPieceGroup].pieceData[0].svg,
+        min: 0,
+        max: 100,
+        asList: false
       });
       graph.setNode("n" + (state.treeId + 1).toString(), {
-        label: "cut",
-        width: 20,
-        height: 20
+        label:
+          "<div><p>cut</p>" +
+          '<svg width="80" height="80"><path d="' +
+          normalizedPath +
+          '" style="fill:' +
+          state.pieceGroups[action.whichPieceGroup].pieceData[0].color +
+          ';"/></div>'
       });
       graph.setEdge(parent, "n" + state.treeId.toString());
       graph.setEdge(parent, "n" + (state.treeId + 1).toString());
+      // state.graph = graph;
       state.graph = gl.json.write(graph);
       state.historyMap[newPieceGroupId] = ["n" + state.treeId.toString()];
       state.historyMap[newPieceGroupId2] = [
         "n" + (state.treeId + 1).toString()
       ];
       state.treeId += 2;
-      state.graph = gl.json.write(graph);
+      // state.graph = gl.json.write(graph);
 
       delete state.pieceGroups[action.whichPieceGroup];
 

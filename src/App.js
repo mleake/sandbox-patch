@@ -5,8 +5,8 @@ import { StoreProvider } from "./store";
 import { ImprovSpace } from "./ImprovSpace";
 import { Layout } from "./Layout";
 // import D3Graph from "./D3Graph";
-import D3Graph from "./D3Graph";
-
+import { D3Graph } from "./D3Graph";
+import { D3DagreGraph } from "./D3DagreGraph";
 import * as JSONdata from "./data.json";
 import { Container, Row, Col } from "react-bootstrap";
 
@@ -27,8 +27,8 @@ export default class App extends React.Component {
             <ImprovSpace />
           </div>
           <PieceBin />
+          <D3DagreGraph />
         </StoreProvider>
-        <D3Graph />
       </div>
     );
   }

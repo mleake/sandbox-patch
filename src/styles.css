@@ -154,3 +154,19 @@
 .dagre-d3 .edgePath.dashed {
   stroke-dasharray: 5, 5;
 }
+tspan {
+  fill: black;
+}
+
+.nodes {
+  fill: darkgray;
+}
+.nodes text {
+  fill: white;
+}
+
+path.path {
+  stroke: black;
+  fill: black;
+  stroke-width: 1.5px;
+}
