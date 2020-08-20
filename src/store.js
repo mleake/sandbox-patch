@@ -253,22 +253,10 @@ const reducer = (state, action) => {
     case "addPieceGroup":
       var newPieceGroups = action.newPieceGroups;
       var idx = Object.keys(state.pieceGroups).length;
-      const g = new dagre.graphlib.Graph();
-
-      // g.setNode("t1", { label: "t1: Kevin Spacey", width: 140, height: 100 });
-      // g.setNode("t2", { label: "t2: Saul Williams", width: 140, height: 100 });
-      // g.setNode("t3", { label: "t3: Brad Pitt", width: 140, height: 100 });
-      // g.setNode("t4", { label: "t4: Harrison Ford", width: 140, height: 100 });
-      // g.setNode("t5", { label: "t5: Luke Wilson", width: 140, height: 100 });
-      // g.setNode("t6", { label: "t6: Kevin Bacon", width: 140, height: 100 });
-      // g.setEdge("t2", "t1");
-      // g.setEdge("t5", "t4");
-      // g.setEdge("t6", "t4");
-      // g.setEdge("t6", "t3");
-
       var graph = new dagre.graphlib.Graph();
-      graph.setDefaultEdgeLabel(function () {
-        return {};
+      var start = "start";
+      graph.setNode(start, {
+        label: "start"
       });
       for (var i = 0; i < Object.keys(newPieceGroups).length; i++) {
         state.pieceGroups[idx] = newPieceGroups[i];
@@ -291,6 +279,7 @@ const reducer = (state, action) => {
           graph.setNode("n" + state.treeId.toString(), {
             label: mysvg
           });
+          graph.setEdge(start, "n" + state.treeId.toString(), "cut");
           parents.push("n" + state.treeId.toString());
           state.historyMap[idx].push("n" + state.treeId.toString());
           state.treeId += 1;
@@ -309,8 +298,8 @@ const reducer = (state, action) => {
           graph.setNode("n" + state.treeId.toString(), {
             label: mysvg
           });
-          graph.setEdge(parents[0], "n" + state.treeId.toString());
-          graph.setEdge(parents[1], "n" + state.treeId.toString());
+          graph.setEdge(parents[0], "n" + state.treeId.toString(), "sew");
+          graph.setEdge(parents[1], "n" + state.treeId.toString(), "sew");
           state.historyMap[idx].push("n" + state.treeId.toString());
           state.treeId += 1;
         }

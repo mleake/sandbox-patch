@@ -29,7 +29,8 @@ export const D3DagreGraph = () => {
     });
     var graphEdges = g.edges();
     graphEdges.forEach((edge) => {
-      edges.push({ source: edge.v, target: edge.w });
+      console.log(g.edge(edge));
+      edges.push({ source: edge.v, target: edge.w, label: g.edge(edge) });
     });
     console.log("nodes", nodes);
     console.log("edges", edges);

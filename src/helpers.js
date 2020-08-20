@@ -220,7 +220,7 @@ export function buildSVGNodeLabel(pieceGroup, whichPiece, nodeType) {
       '" style="fill:' +
       pieceData[whichPiece].color +
       ';"/></svg>';
-    label = "<div><p>cut</p>" + innerSvg + "</div>";
+    label = "<div>" + innerSvg + "</div>";
   } else {
     var innerSvg = '<svg width="50" height="50">';
     for (var i = 0; i < Object.keys(pieceData).length; i++) {
@@ -236,7 +236,7 @@ export function buildSVGNodeLabel(pieceGroup, whichPiece, nodeType) {
         '<path d="' + piecesvg + '" style="fill:' + pieceData[i].color + ';"/>';
     }
     innerSvg += "</svg>";
-    label = "<div><p>sew</p>" + innerSvg + "</div>";
+    label = "<div>" + innerSvg + "</div>";
   }
   return label;
 }
